@@ -1,0 +1,2230 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Media Ajar Studio — Studio Digital Pembelajaran Berbantuan AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        navy: {
+                            DEFAULT: '#142032',
+                            dark: '#0d1522',
+                            light: '#1e2f4a'
+                        },
+                        primary: {
+                            DEFAULT: '#1769AA',
+                            dark: '#114f82',
+                            light: '#2185d0'
+                        },
+                        cyan: {
+                            DEFAULT: '#00AEEF',
+                            dark: '#008dc4',
+                            light: '#33bfff'
+                        },
+                        surface: {
+                            DEFAULT: '#F5F7FA',
+                            card: '#FFFFFF',
+                            border: '#E1E7EF'
+                        },
+                        slate: {
+                            custom: '#697586'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F5F7FA; color: #202B3C; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #F5F7FA; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+        .slide-transition { transition: all 0.3s ease-in-out; }
+    </style>
+</head>
+<body class="bg-[#F5F7FA] text-[#202B3C] min-h-screen flex flex-col antialiased selection:bg-[#1769AA] selection:text-white">
+
+    <!-- Notification Toast System -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2"></div>
+
+    <!-- Custom Modal System -->
+    <div id="custom-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm hidden">
+        <div id="modal-content" class="bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4 overflow-hidden border border-surface-border transform transition-all">
+            <!-- Modal Header -->
+            <div class="px-6 py-4 bg-navy text-white flex items-center justify-between">
+                <h3 id="modal-title" class="font-bold text-lg">Judul Modal</h3>
+                <button onclick="closeModal()" class="text-white/80 hover:text-white transition-colors">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <!-- Modal Body -->
+            <div id="modal-body" class="p-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                <!-- Content injected dynamically -->
+            </div>
+            <!-- Modal Footer -->
+            <div id="modal-footer" class="px-6 py-3 bg-surface border-t border-surface-border flex justify-end space-x-3">
+                <button onclick="closeModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium text-sm">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fullscreen Presentation Mode Container -->
+    <div id="presentation-fullscreen" class="fixed inset-0 z-[100] bg-navy text-white hidden flex-col">
+        <!-- Presentation rendered here -->
+    </div>
+
+    <!-- Main Application Shell -->
+    <div id="app-shell" class="flex h-screen overflow-hidden">
+        
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar" class="w-72 bg-navy text-white flex flex-col transition-all duration-300 z-30 shadow-xl flex-shrink-0">
+            <!-- Brand Header -->
+            <div class="p-5 border-b border-white/10 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1769AA] to-[#00AEEF] flex items-center justify-center shadow-md">
+                        <i class="fa-solid fa-wand-magic-sparkles text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-base tracking-tight leading-tight">AI Media Ajar</h1>
+                        <span class="text-xs text-[#00AEEF] font-semibold tracking-wider uppercase">Studio Premium</span>
+                    </div>
+                </div>
+                <button onclick="toggleSidebar()" class="text-white/70 hover:text-white lg:hidden">
+                    <i class="fa-solid fa-bars text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-1.5">
+                <div class="text-xs font-semibold text-white/40 uppercase px-3 pb-2 tracking-wider">Utama</div>
+                <a href="#dashboard" onclick="navigate('dashboard')" class="nav-link flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-white/10 active">
+                    <i class="fa-solid fa-chart-pie w-5 text-center text-[#00AEEF]"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#projects" onclick="navigate('projects')" class="nav-link flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-white/10">
+                    <i class="fa-solid fa-folder-open w-5 text-center text-[#00AEEF]"></i>
+                    <span>Proyek Saya</span>
+                </a>
+
+                <div class="text-xs font-semibold text-white/40 uppercase px-3 pt-4 pb-2 tracking-wider">Penciptaan AI</div>
+                <a href="#media-generator" onclick="navigate('media-generator')" class="nav-link flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-white/10">
+                    <i class="fa-solid fa-photo-film w-5 text-center text-[#00AEEF]"></i>
+                    <span>Generator Media</span>
+                </a>
+                <a href="#question-generator" onclick="navigate('question-generator')" class="nav-link flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-white/10">
+                    <i class="fa-solid fa-brain w-5 text-center text-[#00AEEF]"></i>
+                    <span>Generator Soal</span>
+                </a>
+                <a href="#question-bank" onclick="navigate('question-bank')" class="nav-link flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-white/10">
+                    <i class="fa-solid fa-box-archive w-5 text-center text-[#00AEEF]"></i>
+                    <span>Bank Soal & Kisi-kisi</span>
+                </a>
+                <a href="#interactive-quiz" onclick="navigate('interactive-quiz')" class="nav-link flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-white/10">
+                    <i class="fa-solid fa-gamepad w-5 text-center text-[#00AEEF]"></i>
+                    <span>Kuis Interaktif</span>
+                </a>
+
+                <div class="text-xs font-semibold text-white/40 uppercase px-3 pt-4 pb-2 tracking-wider">Sumber Belajar</div>
+                <a href="#video-gallery" onclick="navigate('video-gallery')" class="nav-link flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-white/10">
+                    <i class="fa-solid fa-video w-5 text-center text-[#00AEEF]"></i>
+                    <span>Galeri Video YouTube</span>
+                </a>
+                <a href="#materials" onclick="navigate('materials')" class="nav-link flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-white/10">
+                    <i class="fa-solid fa-book-open w-5 text-center text-[#00AEEF]"></i>
+                    <span>Bank Materi</span>
+                </a>
+
+                <div class="text-xs font-semibold text-white/40 uppercase px-3 pt-4 pb-2 tracking-wider">Pusat Pelatihan</div>
+                <a href="#training-center" onclick="navigate('training-center')" class="nav-link flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-white/10">
+                    <i class="fa-solid fa-graduation-cap w-5 text-center text-[#00AEEF]"></i>
+                    <span>Modul Pelatihan (10)</span>
+                </a>
+                <a href="#presentation" onclick="navigate('presentation')" class="nav-link flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-white/10">
+                    <i class="fa-solid fa-laptop-code w-5 text-center text-[#00AEEF]"></i>
+                    <span>Presentasi Pelatihan (32)</span>
+                </a>
+                <a href="#training-agenda" onclick="navigate('training-agenda')" class="nav-link flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-white/10">
+                    <i class="fa-solid fa-calendar-days w-5 text-center text-[#00AEEF]"></i>
+                    <span>Agenda & Jadwal</span>
+                </a>
+                <a href="#prompt-templates" onclick="navigate('prompt-templates')" class="nav-link flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-white/10">
+                    <i class="fa-solid fa-terminal w-5 text-center text-[#00AEEF]"></i>
+                    <span>Template Prompt</span>
+                </a>
+
+                <div class="text-xs font-semibold text-white/40 uppercase px-3 pt-4 pb-2 tracking-wider">Sistem</div>
+                <a href="#external-platforms" onclick="navigate('external-platforms')" class="nav-link flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-white/10">
+                    <i class="fa-solid fa-globe w-5 text-center text-[#00AEEF]"></i>
+                    <span>Platform Eksternal</span>
+                </a>
+                <a href="#settings" onclick="navigate('settings')" class="nav-link flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-white/10">
+                    <i class="fa-solid fa-gear w-5 text-center text-[#00AEEF]"></i>
+                    <span>Pengaturan & Data</span>
+                </a>
+            </nav>
+
+            <!-- User Quick Status / Storage Indicator -->
+            <div class="p-4 border-t border-white/10 bg-navy-dark text-xs flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></div>
+                    <span class="text-white/80 font-medium">Penyimpanan Lokal Aktif</span>
+                </div>
+                <button onclick="exportAllData()" title="Backup Data" class="text-white/60 hover:text-white transition-colors">
+                    <i class="fa-solid fa-download"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Wrapper -->
+        <div class="flex-1 flex flex-col h-screen overflow-hidden">
+            <!-- Top Header -->
+            <header class="h-16 bg-white border-b border-surface-border px-6 flex items-center justify-between z-20 flex-shrink-0 shadow-sm">
+                <div class="flex items-center space-x-4">
+                    <button onclick="toggleSidebarCollapse()" class="text-slate-custom hover:text-navy transition-colors hidden lg:block">
+                        <i class="fa-solid fa-bars text-lg"></i>
+                    </button>
+                    <div>
+                        <h2 id="page-title" class="text-lg font-bold text-navy">Dashboard Utama</h2>
+                        <div id="breadcrumb" class="text-xs text-slate-custom flex items-center space-x-1">
+                            <span>Beranda</span>
+                            <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                            <span class="font-medium text-primary">Dashboard</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Header Actions & Search -->
+                <div class="flex items-center space-x-4">
+                    <div class="relative hidden md:block">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-custom text-xs"></i>
+                        <input type="text" id="global-search" oninput="handleGlobalSearch(this.value)" placeholder="Cari media, soal, materi..." class="bg-surface text-sm pl-9 pr-4 py-2 rounded-lg border border-surface-border focus:outline-none focus:border-primary w-64 transition-all">
+                    </div>
+
+                    <button onclick="openQuickActionModal()" class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-sm transition-all flex items-center space-x-2">
+                        <i class="fa-solid fa-plus"></i>
+                        <span class="hidden sm:inline">Buat Baru</span>
+                    </button>
+
+                    <!-- User Profile Avatar -->
+                    <div class="flex items-center space-x-2 pl-3 border-l border-surface-border">
+                        <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-primary to-cyan text-white font-bold flex items-center justify-center text-sm shadow">
+                            GS
+                        </div>
+                        <div class="hidden xl:block text-left">
+                            <div class="text-xs font-bold text-navy">Guru Senior SMA</div>
+                            <div class="text-[10px] text-slate-custom">Fasilitator Pelatihan</div>
+							<div class="text-[10px] text-slate-custom">Azhari, S.Kom</div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Scrollable Content Area -->
+            <main id="main-content" class="flex-1 overflow-y-auto custom-scrollbar p-6 bg-surface">
+                <!-- Dynamically Rendered Views -->
+            </main>
+        </div>
+    </div>
+
+    <script>
+        /* ==========================================================================
+           1. CORE DATA STORE & INITIALIZATION
+           ========================================================================== */
+        
+        const DEFAULT_APP_DATA = {
+            projects: [
+                { id: 'proj-1', title: 'Infografis Biologi Sel & Organel', subject: 'Biologi', grade: 'XI', topic: 'Struktur dan Fungsi Sel', updated: '2026-06-01', type: 'Infografis' },
+                { id: 'proj-2', title: 'Simulasi Hukum Newton & Gerak', subject: 'Fisika', grade: 'X', topic: 'Dinamika Partikel', updated: '2026-06-03', type: 'Simulasi' },
+                { id: 'proj-3', title: 'Kuis Interaktif Struktur Atom', subject: 'Kimia', grade: 'X', topic: 'Teori Atom Modern', updated: '2026-06-05', type: 'Kuis Interaktif' },
+                { id: 'proj-4', title: 'Analisis Novel Sejarah Indonesia', subject: 'Bahasa Indonesia', grade: 'XII', topic: 'Nilai Intrinsik Sastra', updated: '2026-06-06', type: 'Modul Pembelajaran' },
+                { id: 'proj-5', title: 'Peta Konsep Perang Dingin Global', subject: 'Sejarah', grade: 'XII', topic: 'Konfrontasi Blok Barat & Timur', updated: '2026-06-07', type: 'Peta Konsep' },
+                { id: 'proj-6', title: 'LKPD Interaktif Elastisitas Bahan', subject: 'Fisika', grade: 'XI', topic: 'Hukum Hooke', updated: '2026-06-08', type: 'LKPD' }
+            ],
+            questions: [
+                { id: 'q-1', subject: 'Biologi', grade: 'XI', topic: 'Sel', type: 'Pilihan Ganda', cognitive: 'C3', difficulty: 'Sedang', question: 'Organel sel manakah yang berfungsi sebagai tempat respirasi seluler dan penghasil energi utama (ATP)?', options: ['Retikulum Endoplasma', 'Mitokondria', 'Ribosom', 'Badan Golgi', 'Lisosom'], correct: 1, discussion: 'Mitokondria adalah tempat berlangsungnya respirasi sel yang menghasilkan ATP.', verified: true },
+                { id: 'q-2', subject: 'Fisika', grade: 'X', topic: 'Kinematika', type: 'Pilihan Ganda', cognitive: 'C4', difficulty: 'Sukar', question: 'Sebuah mobil bergerak dengan kecepatan awal 20 m/s mengalami percepatan tetap 2 m/s² selama 5 detik. Berapa jarak total?', options: ['100 meter', '125 meter', '150 meter', '175 meter', '200 meter'], correct: 1, discussion: 'S = v0.t + 1/2.a.t² = (20)(5) + 0.5(2)(25) = 100 + 25 = 125 meter.', verified: true },
+                { id: 'q-3', subject: 'Kimia', grade: 'XI', topic: 'Termokimia', type: 'Pilihan Ganda', cognitive: 'C3', difficulty: 'Sedang', question: 'Reaksi kimia yang disertai dengan pelepasan kalor dari sistem ke lingkungan disebut...', options: ['Reaksi Endoterm', 'Reaksi Eksoterm', 'Reaksi Pembakaran', 'Reaksi Netralisasi', 'Reaksi Redoks'], correct: 1, discussion: 'Reaksi eksoterm melepaskan kalor sehingga suhu lingkungan meningkat.', verified: true },
+                { id: 'q-4', subject: 'Matematika', grade: 'XI', topic: 'Turunan', type: 'Pilihan Ganda', cognitive: 'C4', difficulty: 'Sukar', question: 'Turunan pertama dari fungsi f(x) = (3x² - 5)⁴ adalah...', options: ['12x(3x² - 5)³', '24x(3x² - 5)³', '4(3x² - 5)³', '12x²(3x² - 5)³', '24x²(3x² - 5)³'], correct: 1, discussion: 'Gunakan aturan rantai: f\'(x) = 4(3x² - 5)³ . (6x) = 24x(3x² - 5)³.', verified: true },
+                { id: 'q-5', subject: 'Sejarah', grade: 'XII', topic: 'Kemerdekaan', type: 'Pilihan Ganda', cognitive: 'C2', difficulty: 'Mudah', question: 'Peristiwa Rengasdengklok yang terjadi pada tanggal 16 Agustus 1945 bertujuan untuk...', options: ['Menangkap golongan muda', 'Menghindari pengaruh dan tekanan tentara Jepang', 'Merumuskan UUD 1945 bersama tentara Sekutu', 'Menyerahkan kekuasaan kepada sekutu', 'Mengamankan teks proklamasi'], correct: 1, discussion: 'Golongan muda mengamankan Soekarno-Hatta ke Rengasdengklok agar terhindar dari pengaruh Jepang.', verified: true }
+            ],
+            quizzes: [
+                {
+                    id: 'quiz-1',
+                    title: 'Kuis Evaluasi Biologi: Sel & Jaringan',
+                    subject: 'Biologi',
+                    grade: 'XI',
+                    description: 'Kuis komprehensif mengenai struktur sel tumbuhan, hewan, serta mekanisme transpor membran.',
+                    questions: [
+                        { q: 'Organel sel manakah yang berfungsi sebagai tempat respirasi seluler dan penghasil energi utama (ATP)?', options: ['Retikulum Endoplasma', 'Mitokondria', 'Ribosom', 'Badan Golgi'], correct: 1, explanation: 'Mitokondria menghasilkan ATP melalui siklus Krebs dan transpor elektron.' },
+                        { q: 'Transpor zat melalui membran yang melawan gradien konsentrasi dan memerlukan energi disebut...', options: ['Difusi', 'Osmosis', 'Transpor Aktif', 'Difusi Dipermudah'], correct: 2, explanation: 'Transpor aktif memerlukan ATP melawan gradien konsentrasi.' },
+                        { q: 'Bagian sel tumbuhan yang memberikan kekakuan dan bentuk tetap adalah...', options: ['Membran plasma', 'Dinding sel', 'Vakuola', 'Sitoplasma'], correct: 1, explanation: 'Dinding sel tersusun atas selulosa yang kokoh pada tumbuhan.' }
+                    ]
+                },
+                {
+                    id: 'quiz-2',
+                    title: 'Kuis Fisika Dasar: Kinematika Gerak Lurus',
+                    subject: 'Fisika',
+                    grade: 'X',
+                    description: 'Uji pemahaman konsep GLB, GLBB, dan grafik kecepatan terhadap waktu.',
+                    questions: [
+                        { q: 'Grafik hubungan antara kecepatan (v) terhadap waktu (t) pada gerak lurus beraturan (GLB) berupa...', options: ['Garis lurus miring ke atas', 'Garis lurus mendatar', 'Parabola', 'Hiperbola'], correct: 1, explanation: 'Pada GLB kecepatan konstan, sehingga grafik v-t berupa garis mendatar.' },
+                        { q: 'Sebuah mobil direm mendadak hingga berhenti dari kecepatan 20 m/s dalam waktu 4 sekon. Besar perlambatan mobil adalah...', options: ['2 m/s²', '4 m/s²', '5 m/s²', '10 m/s²'], correct: 2, explanation: 'a = (vt - v0)/t = (0 - 20)/4 = -5 m/s² (perlambatan 5 m/s²).' }
+                    ]
+                },
+                {
+                    id: 'quiz-3',
+                    title: 'Kuis Kimia Umum: Ikatan Kimia & Struktur',
+                    subject: 'Kimia',
+                    grade: 'X',
+                    description: 'Latihan soal ikatan ionik, kovalen, dan kepolaran senyawa.',
+                    questions: [
+                        { q: 'Senyawa berikut yang berikatan ion adalah...', options: ['H2O', 'CO2', 'NaCl', 'NH3'], correct: 2, explanation: 'NaCl terbentuk dari ikatan antara ion Na+ dan Cl-.' },
+                        { q: 'Ikatan kovalen rangkap dua terdapat pada molekul...', options: ['H2', 'O2', 'N2', 'HCl'], correct: 1, explanation: 'Molekul O2 memiliki 2 pasang elektron ikatan (rangkap dua).' }
+                    ]
+                }
+            ],
+            materials: [
+                { id: 'mat-1', title: 'Modul Pembelajaran Biologi Sel SMA Kelas XI', subject: 'Biologi', grade: 'XI', semester: '1', topic: 'Sel', summary: 'Materi mendalam mengenai struktur organel sel eukariotik dan prokariotik beserta fungsinya.', content: 'Sel adalah unit struktural dan fungsional terkecil makhluk hidup. Organel sel meliputi nukleus, retikulum endoplasma kasar dan halus, ribosom, badan golgi, lisosom, mitokondria, dan kloroplas (pada tumbuhan). Transpor membran dibedakan menjadi transpor pasif (difusi dan osmosis) serta transpor aktif (pompa natrium-kalium, endositosis, dan eksositosis).', verified: true },
+                { id: 'mat-2', title: 'Ringkasan Teori Kinematika dan Dinamika', subject: 'Fisika', grade: 'X', semester: '1', topic: 'Gerak Lurus', summary: 'Panduan lengkap rumus GLB, GLBB, hukum Newton 1, 2, 3, dan gaya gesek.', content: 'Kinematika mempelajari gerak tanpa memperhitungkan penyebabnya. Rumus utama GLBB: vt = v0 + a.t, s = v0.t + 1/2 a.t², vt² = v0² + 2as. Hukum Newton I berkaitan dengan kelembaman (inertia), Hukum II menyatakan ΣF = m.a, dan Hukum III menyatakan gaya aksi-reaksi (Faksi = -Freaksi).', verified: true },
+                { id: 'mat-3', title: 'Konsep Dasar Termokimia dan Perubahan Entalpi', subject: 'Kimia', grade: 'XI', semester: '1', topic: 'Termokimia', summary: 'Pembahasan sistem, lingkungan, reaksi eksoterm/endoterm, dan hukum Hess.', content: 'Termokimia mempelajari perubahan panas yang menyertai reaksi kimia. Sistem adalah bagian yang diamati, sedangkan lingkungan adalah segala sesuatu di luar sistem. Perubahan entalpi (ΔH) bernilai negatif untuk reaksi eksoterm (pelepasan kalor) dan positif untuk reaksi endoterm (penyerapan kalor).', verified: true }
+            ],
+            videos: [
+                { id: 'vid-1', title: 'Animasi 3D Proses Mitosis dan Meiosis Sel', subject: 'Biologi', grade: 'XI', topic: 'Pembelahan Sel', youtubeId: 'g7z7ivz8x_4', summary: 'Visualisasi 3D tahapan profase, metafase, anafase, dan telofase pada pembelahan sel.' },
+                { id: 'vid-2', title: 'Praktikum Virtual Hukum Newton I, II, III', subject: 'Fisika', grade: 'X', topic: 'Dinamika', youtubeId: 'ddW95bK9wRk', summary: 'Demonstrasi interaktif gaya dan percepatan benda di atas bidang datar dan miring.' },
+                { id: 'vid-3', title: 'Eksperimen Kimia: Reaksi Eksoterm dan Endoterm', subject: 'Kimia', grade: 'XI', topic: 'Termokimia', youtubeId: 'm9N2x1v4c6Z', summary: 'Percobaan perubahan suhu menggunakan larutan NaOH dan HCl di laboratorium sekolah.' }
+            ],
+            promptTemplates: [
+                { id: 'pt-1', category: 'Media', name: 'Infografis Edukatif', desc: 'Membuat draf prompt infografis yang terstruktur untuk Canva / Midjourney.', prompt: 'Bertindaklah sebagai desainer grafis pendidikan. Buat rancangan infografis untuk materi [TOPIK] mata pelajaran [MAPEL] kelas [KELAS]. Sertakan judul utama, 4 poin kunci penjelasan, palet warna profesional, dan ilustrasi visual yang mendukung.' },
+                { id: 'pt-2', category: 'Soal', name: 'Soal Pilihan Ganda HOTS', desc: 'Menyusun butir soal HOTS tingkat kognitif C4-C6 berpola studi kasus.', prompt: 'Bertindaklah sebagai ahli asesmen pendidikan SMA. Buat 5 butir soal Pilihan Ganda HOTS (Analisis C4/Evaluasi C5) untuk mata pelajaran [MAPEL] kelas [KELAS] tentang [TOPIK]. Lengkapi dengan 5 opsi jawaban (A-E), kunci jawaban, dan pembahasan rinci.' },
+                { id: 'pt-3', category: 'Modul', name: 'Modul Ajar Kurikulum Merdeka', desc: 'Menghasilkan draf modul ajar lengkap berbasis tujuan pembelajaran.', prompt: 'Bertindaklah sebagai instructional designer profesional. Susun draf Modul Ajar Kurikulum Merdeka untuk mata pelajaran [MAPEL] kelas [KELAS] topik [TOPIK]. Sertakan Tujuan Pembelajaran, Pertanyaan Pemantik, Kegiatan Pembelajaran 3 pertemuan, dan Asesmen formatif.' }
+            ],
+            agenda: [
+                { session: 'Sesi 1', time: '08:00 - 09:30', title: 'Orientasi Pembelajaran Digital & Peran AI', activity: 'Pengantar paradigma media interaktif dan pengenalan AI generatif untuk guru SMA.', speaker: 'Tim Ahli Teknologi Pendidikan' },
+                { session: 'Sesi 2', time: '09:45 - 11:15', title: 'Teknik Menyusun Prompt & Generator Media', activity: 'Praktik langsung membuat infografis, poster, dan presentasi menggunakan generator AI.', speaker: 'Senior Full-stack & AI Specialist' },
+                { session: 'Sesi 3', time: '13:00 - 14:30', title: 'Generator Soal, Kisi-Kisi & Kuis Interaktif', activity: 'Menyusun asesmen formatif, soal HOTS, dan menjalankan kuis interaktif di kelas.', speaker: 'Ahli Asesmen Pembelajaran' },
+                { session: 'Sesi 4', time: '14:45 - 16:00', title: 'Simulasi, Galeri Video & Rencana Tindak Lanjut', activity: 'Integrasi video YouTube, manajemen proyek, dan refleksi pelatihan mandiri.', speaker: 'Tim Pengembang Media' }
+            ]
+        };
+
+        // Initialize Local Storage DB
+        let appData = JSON.parse(localStorage.getItem('ai_media_ajar_data')) || DEFAULT_APP_DATA;
+        
+        function saveAppData() {
+            localStorage.setItem('ai_media_ajar_data', JSON.stringify(appData));
+            showToast('Perubahan berhasil disimpan ke penyimpanan lokal!', 'success');
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bgCol = type === 'success' ? 'bg-emerald-600' : type === 'error' ? 'bg-rose-600' : 'bg-primary';
+            const icon = type === 'success' ? 'fa-circle-check' : type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-info';
+            
+            toast.className = `${bgCol} text-white px-4 py-3 rounded-xl shadow-lg flex items-center space-x-3 text-sm font-medium transform transition-all duration-300 translate-y-2 opacity-0`;
+            toast.innerHTML = `<i class="fa-solid ${icon} text-base"></i><span>${message}</span>`;
+            
+            container.appendChild(toast);
+            setTimeout(() => { toast.classList.remove('translate-y-2', 'opacity-0'); }, 10);
+            setTimeout(() => {
+                toast.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        function openModal(title, contentHTML) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-body').innerHTML = contentHTML;
+            document.getElementById('custom-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('custom-modal').classList.add('hidden');
+        }
+
+        // Navigation Router
+        function navigate(viewId) {
+            // Update active sidebar link
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('bg-white/10', 'text-cyan', 'font-bold');
+                if (link.getAttribute('href') === `#${viewId}`) {
+                    link.classList.add('bg-white/10', 'text-cyan', 'font-bold');
+                }
+            });
+
+            const mainContent = document.getElementById('main-content');
+            window.location.hash = viewId;
+
+            // Render view
+            switch(viewId) {
+                case 'dashboard': renderDashboard(mainContent); break;
+                case 'projects': renderProjects(mainContent); break;
+                case 'media-generator': renderMediaGenerator(mainContent); break;
+                case 'question-generator': renderQuestionGenerator(mainContent); break;
+                case 'question-bank': renderQuestionBank(mainContent); break;
+                case 'interactive-quiz': renderInteractiveQuiz(mainContent); break;
+                case 'video-gallery': renderVideoGallery(mainContent); break;
+                case 'materials': renderMaterials(mainContent); break;
+                case 'training-center': renderTrainingCenter(mainContent); break;
+                case 'presentation': renderPresentation(mainContent); break;
+                case 'training-agenda': renderTrainingAgenda(mainContent); break;
+                case 'prompt-templates': renderPromptTemplates(mainContent); break;
+                case 'external-platforms': renderExternalPlatforms(mainContent); break;
+                case 'settings': renderSettings(mainContent); break;
+                default: renderDashboard(mainContent); break;
+            }
+            
+            // Scroll to top
+            mainContent.scrollTop = 0;
+        }
+
+        window.addEventListener('load', () => {
+            const hash = window.location.hash.substring(1) || 'dashboard';
+            navigate(hash);
+        });
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('-translate-x-full');
+        }
+
+        function toggleSidebarCollapse() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('w-72');
+            sidebar.classList.toggle('w-20');
+        }
+    </script>
+
+    <script>
+        /* ==========================================================================
+           2. VIEW IMPLEMENTATIONS
+           ========================================================================== */
+
+        function renderDashboard(container) {
+            document.getElementById('page-title').innerText = 'Dashboard Utama';
+            document.getElementById('breadcrumb').innerHTML = '<span>Beranda</span><i class="fa-solid fa-chevron-right text-[10px]"></i><span class="font-medium text-primary">Dashboard</span>';
+
+            const totalProjects = appData.projects.length;
+            const totalQuestions = appData.questions.length;
+            const totalQuizzes = appData.quizzes.length;
+            const totalMaterials = appData.materials.length;
+
+            container.innerHTML = `
+                <!-- Welcome Banner -->
+                <div class="bg-gradient-to-r from-navy to-primary rounded-2xl p-8 text-white shadow-xl mb-8 relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center">
+                    <div class="absolute right-0 bottom-0 translate-x-10 translate-y-10 text-white/5 text-9xl pointer-events-none">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    </div>
+                    <div class="z-10 mb-6 md:mb-0">
+                        <span class="bg-cyan/20 text-cyan text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Studio Digital Pembelajaran AI</span>
+                        <h2 class="text-3xl font-extrabold mt-3 tracking-tight">Selamat Datang, Guru Kreatif!</h2>
+                        <p class="text-white/80 text-sm mt-2 max-w-2xl leading-relaxed">
+                            Platform terpadu untuk merancang media visual interaktif, menyusun asesmen berbasis taksonomi Bloom, dan mengelola materi pembelajaran SMA dengan bantuan kecerdasan buatan.
+                        </p>
+                        <div class="flex flex-wrap gap-3 mt-6">
+                            <button onclick="navigate('media-generator')" class="bg-cyan hover:bg-cyan-dark text-navy font-bold px-5 py-2.5 rounded-xl text-sm shadow-md transition-all flex items-center space-x-2">
+                                <i class="fa-solid fa-wand-sparkles"></i>
+                                <span>Buat Media Baru</span>
+                            </button>
+                            <button onclick="navigate('question-generator')" class="bg-white/10 hover:bg-white/20 text-white font-semibold px-5 py-2.5 rounded-xl text-sm border border-white/20 transition-all flex items-center space-x-2">
+                                <i class="fa-solid fa-brain"></i>
+                                <span>Generator Soal</span>
+                            </button>
+                            <button onclick="navigate('presentation')" class="bg-white/10 hover:bg-white/20 text-white font-semibold px-5 py-2.5 rounded-xl text-sm border border-white/20 transition-all flex items-center space-x-2">
+                                <i class="fa-solid fa-laptop-code"></i>
+                                <span>Mulai Presentasi</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="z-10 bg-white/10 backdrop-blur-md p-5 rounded-xl border border-white/15 w-full md:w-auto text-center">
+                        <div class="text-xs text-cyan font-bold uppercase tracking-wider">Pelatihan Aktif</div>
+                        <div class="text-lg font-bold mt-1">Media Visual & Kuis AI</div>
+                        <div class="text-xs text-white/70 mt-1">32 Modul & Slide Siap Tayang</div>
+                        <button onclick="navigate('training-center')" class="mt-4 w-full bg-white text-navy font-bold py-2 px-4 rounded-lg text-xs hover:bg-surface transition-colors shadow">
+                            Buka Modul Pelatihan
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Statistics Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-surface-border flex items-center justify-between">
+                        <div>
+                            <div class="text-xs font-semibold text-slate-custom uppercase tracking-wider">Total Proyek</div>
+                            <div class="text-3xl font-extrabold text-navy mt-1">${totalProjects}</div>
+                            <div class="text-xs text-emerald-600 font-medium mt-1"><i class="fa-solid fa-arrow-up"></i> Tersimpan di Browser</div>
+                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-folder-open"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-surface-border flex items-center justify-between">
+                        <div>
+                            <div class="text-xs font-semibold text-slate-custom uppercase tracking-wider">Bank Soal Tersimpan</div>
+                            <div class="text-3xl font-extrabold text-navy mt-1">${totalQuestions}</div>
+                            <div class="text-xs text-emerald-600 font-medium mt-1"><i class="fa-solid fa-check"></i> Terverifikasi Guru</div>
+                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-cyan/10 text-cyan-dark flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-brain"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-surface-border flex items-center justify-between">
+                        <div>
+                            <div class="text-xs font-semibold text-slate-custom uppercase tracking-wider">Kuis Interaktif</div>
+                            <div class="text-3xl font-extrabold text-navy mt-1">${totalQuizzes}</div>
+                            <div class="text-xs text-emerald-600 font-medium mt-1"><i class="fa-solid fa-play"></i> Siap Dimainkan</div>
+                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-gamepad"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-surface-border flex items-center justify-between">
+                        <div>
+                            <div class="text-xs font-semibold text-slate-custom uppercase tracking-wider">Materi & Video</div>
+                            <div class="text-3xl font-extrabold text-navy mt-1">${totalMaterials + appData.videos.length}</div>
+                            <div class="text-xs text-emerald-600 font-medium mt-1"><i class="fa-solid fa-book"></i> Referensi Lengkap</div>
+                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-book-bookmark"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Projects & Quick Actions -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Recent Projects List -->
+                    <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-surface-border p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="font-bold text-lg text-navy flex items-center space-x-2">
+                                <i class="fa-solid fa-clock-rotate-left text-primary"></i>
+                                <span>Proyek Terakhir Dibuka</span>
+                            </h3>
+                            <button onclick="navigate('projects')" class="text-xs font-bold text-primary hover:underline">Lihat Semua</button>
+                        </div>
+                        <div class="space-y-4">
+                            ${appData.projects.slice(0, 4).map(p => `
+                                <div class="flex items-center justify-between p-4 rounded-xl border border-surface-border hover:border-primary/50 transition-all bg-surface/50">
+                                    <div class="flex items-center space-x-4">
+                                        <div class="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">
+                                            ${p.subject.substring(0,2).toUpperCase()}
+                                        </div>
+                                        <div>
+                                            <h4 class="font-bold text-sm text-navy">${p.title}</h4>
+                                            <div class="text-xs text-slate-custom mt-0.5">${p.subject} • Kelas ${p.grade} • ${p.topic}</div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-3">
+                                        <span class="text-xs bg-primary/10 text-primary font-semibold px-2.5 py-1 rounded-full">${p.type}</span>
+                                        <button onclick="openProjectDetail('${p.id}')" class="text-slate-custom hover:text-primary transition-colors p-2">
+                                            <i class="fa-solid fa-arrow-right"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Quick Tools / Recommendations -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-surface-border p-6 flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-bold text-lg text-navy flex items-center space-x-2 mb-4">
+                                <i class="fa-solid fa-bolt text-amber-500"></i>
+                                <span>Akses Cepat Studio</span>
+                            </h3>
+                            <div class="space-y-3">
+                                <button onclick="navigate('media-generator')" class="w-full text-left p-3 rounded-xl border border-surface-border hover:bg-surface transition-all flex items-center justify-between group">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-8 h-8 rounded-lg bg-cyan/10 text-cyan flex items-center justify-center">
+                                            <i class="fa-solid fa-photo-film text-sm"></i>
+                                        </div>
+                                        <div>
+                                            <div class="font-bold text-xs text-navy group-hover:text-primary">Generator Prompt Media</div>
+                                            <div class="text-[11px] text-slate-custom">Infografis, Poster, LKPD</div>
+                                        </div>
+                                    </div>
+                                    <i class="fa-solid fa-chevron-right text-xs text-slate-custom"></i>
+                                </button>
+                                <button onclick="navigate('question-generator')" class="w-full text-left p-3 rounded-xl border border-surface-border hover:bg-surface transition-all flex items-center justify-between group">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center">
+                                            <i class="fa-solid fa-brain text-sm"></i>
+                                        </div>
+                                        <div>
+                                            <div class="font-bold text-xs text-navy group-hover:text-primary">Generator Soal HOTS</div>
+                                            <div class="text-[11px] text-slate-custom">Pilihan ganda, esai, rubrik</div>
+                                        </div>
+                                    </div>
+                                    <i class="fa-solid fa-chevron-right text-xs text-slate-custom"></i>
+                                </button>
+                                <button onclick="navigate('interactive-quiz')" class="w-full text-left p-3 rounded-xl border border-surface-border hover:bg-surface transition-all flex items-center justify-between group">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                                            <i class="fa-solid fa-gamepad text-sm"></i>
+                                        </div>
+                                        <div>
+                                            <div class="font-bold text-xs text-navy group-hover:text-primary">Mainkan Kuis Interaktif</div>
+                                            <div class="text-[11px] text-slate-custom">Evaluasi langsung di kelas</div>
+                                        </div>
+                                    </div>
+                                    <i class="fa-solid fa-chevron-right text-xs text-slate-custom"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-surface-border bg-surface p-4 rounded-xl">
+                            <div class="text-xs font-bold text-navy">Butuh Panduan Pelatihan?</div>
+                            <div class="text-[11px] text-slate-custom mt-0.5">Buka 10 modul lengkap atau jalankan presentasi 32 slide.</div>
+                            <button onclick="navigate('presentation')" class="mt-3 w-full bg-primary hover:bg-primary-dark text-white font-bold py-2 rounded-lg text-xs transition-colors">
+                                Mulai Presentasi Pelatihan
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function openQuickActionModal() {
+            openModal('Buat Konten Baru', `
+                <div class="space-y-4">
+                    <p class="text-xs text-slate-custom">Pilih jenis karya pembelajaran yang ingin Anda buat hari ini:</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="closeModal(); navigate('media-generator');" class="p-4 rounded-xl border border-surface-border hover:border-primary hover:bg-surface transition-all text-left">
+                            <div class="w-10 h-10 rounded-lg bg-cyan/10 text-cyan flex items-center justify-center text-lg mb-3">
+                                <i class="fa-solid fa-photo-film"></i>
+                            </div>
+                            <div class="font-bold text-sm text-navy">Media Pembelajaran</div>
+                            <div class="text-xs text-slate-custom mt-1">Infografis, Poster, Presentasi, LKPD</div>
+                        </button>
+                        <button onclick="closeModal(); navigate('question-generator');" class="p-4 rounded-xl border border-surface-border hover:border-primary hover:bg-surface transition-all text-left">
+                            <div class="w-10 h-10 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center text-lg mb-3">
+                                <i class="fa-solid fa-brain"></i>
+                            </div>
+                            <div class="font-bold text-sm text-navy">Soal & Asesmen</div>
+                            <div class="text-xs text-slate-custom mt-1">Pilihan Ganda, Esai HOTS, Kisi-kisi</div>
+                        </button>
+                        <button onclick="closeModal(); navigate('interactive-quiz');" class="p-4 rounded-xl border border-surface-border hover:border-primary hover:bg-surface transition-all text-left">
+                            <div class="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center text-lg mb-3">
+                                <i class="fa-solid fa-gamepad"></i>
+                            </div>
+                            <div class="font-bold text-sm text-navy">Kuis Interaktif</div>
+                            <div class="text-xs text-slate-custom mt-1">Kuis kelas dengan penilaian skor</div>
+                        </button>
+                        <button onclick="closeModal(); navigate('materials');" class="p-4 rounded-xl border border-surface-border hover:border-primary hover:bg-surface transition-all text-left">
+                            <div class="w-10 h-10 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center text-lg mb-3">
+                                <i class="fa-solid fa-book-open"></i>
+                            </div>
+                            <div class="font-bold text-sm text-navy">Bank Materi</div>
+                            <div class="text-xs text-slate-custom mt-1">Simpan ringkasan & referensi ajar</div>
+                        </button>
+                    </div>
+                </div>
+            `);
+        }
+
+        function openProjectDetail(id) {
+            const p = appData.projects.find(item => item.id === id);
+            if (!p) return;
+            openModal(`Detail Proyek: ${p.title}`, `
+                <div class="space-y-4">
+                    <div class="bg-surface p-4 rounded-xl border border-surface-border">
+                        <div class="text-xs font-bold text-primary uppercase">${p.type} • Kelas ${p.grade}</div>
+                        <h4 class="text-base font-bold text-navy mt-1">${p.title}</h4>
+                        <div class="text-xs text-slate-custom mt-1">Mata Pelajaran: <strong>${p.subject}</strong> | Topik: <strong>${p.topic}</strong></div>
+                        <div class="text-xs text-slate-custom mt-1">Terakhir diperbarui: ${p.updated}</div>
+                    </div>
+                    <div>
+                        <h5 class="font-bold text-xs text-navy uppercase mb-2">Deskripsi & Ruang Lingkup Proyek</h5>
+                        <p class="text-xs text-slate-custom leading-relaxed">Proyek media pembelajaran ini dirancang khusus untuk mendukung kegiatan belajar mengajar di kelas ${p.grade} SMA pada topik ${p.topic}. Anda dapat menggunakan prompt terkait untuk menghasilkan aset visual di Canva, Midjourney, atau Gemini.</p>
+                    </div>
+                    <div class="flex justify-end space-x-2 pt-3 border-t border-surface-border">
+                        <button onclick="closeModal(); showToast('Proyek berhasil dimuat ke editor!', 'success');" class="bg-primary hover:bg-primary-dark text-white font-bold px-4 py-2 rounded-lg text-xs">Buka di Generator</button>
+                    </div>
+                </div>
+            `);
+        }
+
+        function handleGlobalSearch(query) {
+            if (!query.trim()) return;
+            // Search logic placeholder
+        }
+    </script>
+
+    <script>
+        function renderProjects(container) {
+            document.getElementById('page-title').innerText = 'Proyek Saya';
+            document.getElementById('breadcrumb').innerHTML = '<span>Beranda</span><i class="fa-solid fa-chevron-right text-[10px]"></i><span class="font-medium text-primary">Proyek Saya</span>';
+
+            container.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-sm border border-surface-border p-6 mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <div>
+                        <h3 class="font-bold text-lg text-navy">Manajemen Proyek Pembelajaran</h3>
+                        <p class="text-xs text-slate-custom">Kelola seluruh media, kuis, dan rancangan materi yang telah Anda simpan.</p>
+                    </div>
+                    <button onclick="openNewProjectModal()" class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-xl text-sm font-bold shadow transition-all flex items-center space-x-2">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Buat Proyek Baru</span>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    ${appData.projects.map(p => `
+                        <div class="bg-white rounded-2xl shadow-sm border border-surface-border p-6 flex flex-col justify-between hover:border-primary/50 transition-all">
+                            <div>
+                                <div class="flex items-center justify-between mb-3">
+                                    <span class="text-xs bg-primary/10 text-primary font-bold px-2.5 py-1 rounded-full">${p.type}</span>
+                                    <span class="text-xs text-slate-custom">Kelas ${p.grade}</span>
+                                </div>
+                                <h4 class="font-bold text-base text-navy">${p.title}</h4>
+                                <div class="text-xs text-slate-custom mt-1"><i class="fa-solid fa-book-open text-primary mr-1"></i> ${p.subject} • ${p.topic}</div>
+                            </div>
+                            <div class="mt-6 pt-4 border-t border-surface-border flex items-center justify-between">
+                                <span class="text-[11px] text-slate-custom">Diperbarui: ${p.updated}</span>
+                                <div class="flex space-x-2">
+                                    <button onclick="openProjectDetail('${p.id}')" class="p-2 bg-surface hover:bg-primary hover:text-white rounded-lg transition-colors text-xs text-slate-custom" title="Detail">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button onclick="deleteProject('${p.id}')" class="p-2 bg-surface hover:bg-rose-600 hover:text-white rounded-lg transition-colors text-xs text-slate-custom" title="Hapus">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function openNewProjectModal() {
+            openModal('Buat Proyek Baru', `
+                <form onsubmit="saveNewProject(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-navy mb-1">Judul Proyek</label>
+                        <input type="text" id="np-title" required placeholder="Cth: Infografis Sistem Ekskresi Manusia" class="w-full bg-surface text-sm px-3 py-2 rounded-lg border border-surface-border focus:outline-none focus:border-primary">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-navy mb-1">Mata Pelajaran</label>
+                            <select id="np-subject" class="w-full bg-surface text-sm px-3 py-2 rounded-lg border border-surface-border focus:outline-none focus:border-primary">
+                                <option>Biologi</option><option>Fisika</option><option>Kimia</option><option>Matematika</option><option>Bahasa Indonesia</option><option>Sejarah</option><option>Ekonomi</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-navy mb-1">Kelas</label>
+                            <select id="np-grade" class="w-full bg-surface text-sm px-3 py-2 rounded-lg border border-surface-border focus:outline-none focus:border-primary">
+                                <option>X</option><option>XI</option><option>XII</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-navy mb-1">Topik Pembelajaran</label>
+                        <input type="text" id="np-topic" required placeholder="Cth: Nefron dan Filtrasi Ginjal" class="w-full bg-surface text-sm px-3 py-2 rounded-lg border border-surface-border focus:outline-none focus:border-primary">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-navy mb-1">Jenis Media</label>
+                        <select id="np-type" class="w-full bg-surface text-sm px-3 py-2 rounded-lg border border-surface-border focus:outline-none focus:border-primary">
+                            <option>Infografis</option><option>Poster Edukasi</option><option>Presentasi</option><option>LKPD</option><option>Simulasi</option><option>Peta Konsep</option><option>Bahan Ajar</option>
+                        </select>
+                    </div>
+                    <div class="flex justify-end space-x-2 pt-3 border-t border-surface-border">
+                        <button type="button" onclick="closeModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-xs font-medium">Batal</button>
+                        <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg text-xs font-bold hover:bg-primary-dark">Simpan Proyek</button>
+                    </div>
+                </form>
+            `);
+        }
+
+        function saveNewProject(e) {
+            e.preventDefault();
+            const newProj = {
+                id: 'proj-' + Date.now(),
+                title: document.getElementById('np-title').value,
+                subject: document.getElementById('np-subject').value,
+                grade: document.getElementById('np-grade').value,
+                topic: document.getElementById('np-topic').value,
+                type: document.getElementById('np-type').value,
+                updated: new Date().toISOString().split('T')[0]
+            };
+            appData.projects.unshift(newProj);
+            saveAppData();
+            closeModal();
+            renderProjects(document.getElementById('main-content'));
+        }
+
+        function deleteProject(id) {
+            openModal('Konfirmasi Hapus', `
+                <p class="text-xs text-slate-custom mb-4">Apakah Anda yakin ingin menghapus proyek ini dari penyimpanan lokal?</p>
+                <div class="flex justify-end space-x-2">
+                    <button onclick="closeModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-xs font-medium">Batal</button>
+                    <button onclick="confirmDeleteProject('${id}')" class="px-4 py-2 bg-rose-600 text-white rounded-lg text-xs font-bold hover:bg-rose-700">Hapus</button>
+                </div>
+            `);
+        }
+
+        function confirmDeleteProject(id) {
+            appData.projects = appData.projects.filter(p => p.id !== id);
+            saveAppData();
+            closeModal();
+            renderProjects(document.getElementById('main-content'));
+        }
+
+        function renderMediaGenerator(container) {
+            document.getElementById('page-title').innerText = 'Generator Media Pembelajaran AI';
+            document.getElementById('breadcrumb').innerHTML = '<span>Beranda</span><i class="fa-solid fa-chevron-right text-[10px]"></i><span class="font-medium text-primary">Generator Media</span>';
+
+            container.innerHTML = `
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    <!-- Form Input Column -->
+                    <div class="lg:col-span-5 bg-white rounded-2xl shadow-sm border border-surface-border p-6">
+                        <h3 class="font-bold text-base text-navy flex items-center space-x-2 mb-4">
+                            <i class="fa-solid fa-sliders text-primary"></i>
+                            <span>Parameter Pembuatan Media</span>
+                        </h3>
+                        <form id="media-gen-form" onsubmit="generateMediaPrompt(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-navy mb-1">Mata Pelajaran</label>
+                                <select id="mg-subject" class="w-full bg-surface text-sm px-3 py-2 rounded-lg border border-surface-border focus:outline-none focus:border-primary">
+                                    <option>Biologi</option><option>Fisika</option><option>Kimia</option><option>Matematika</option><option>Bahasa Indonesia</option><option>Sejarah</option><option>Ekonomi</option><option>Informatika</option>
+                                </select>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-bold text-navy mb-1">Kelas</label>
+                                    <select id="mg-grade" class="w-full bg-surface text-sm px-3 py-2 rounded-lg border border-surface-border focus:outline-none focus:border-primary">
+                                        <option>X</option><option>XI</option><option>XII</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-navy mb-1">Jenis Media</label>
+                                    <select id="mg-type" class="w-full bg-surface text-sm px-3 py-2 rounded-lg border border-surface-border focus:outline-none focus:border-primary">
+                                        <option>Infografis</option><option>Poster Edukasi</option><option>Presentasi 10 Slide</option><option>LKPD Interaktif</option><option>Peta Konsep</option><option>Komik Edukasi</option><option>Media Ajar</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-navy mb-1">Topik Pembelajaran</label>
+                                <input type="text" id="mg-topic" required placeholder="Cth: Sistem Kekebalan Tubuh & Imunisasi" class="w-full bg-surface text-sm px-3 py-2 rounded-lg border border-surface-border focus:outline-none focus:border-primary">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-navy mb-1">Tujuan Pembelajaran</label>
+                                <textarea id="mg-objective" rows="2" required placeholder="Cth: Peserta didik mampu menjelaskan mekanisme pertahanan tubuh spesifik dan non-spesifik." class="w-full bg-surface text-sm px-3 py-2 rounded-lg border border-surface-border focus:outline-none focus:border-primary"></textarea>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-bold text-navy mb-1">Gaya Visual</label>
+                                    <select id="mg-style" class="w-full bg-surface text-sm px-3 py-2 rounded-lg border border-surface-border focus:outline-none focus:border-primary">
+                                        <option>Modern Profesional (Clean & Flat)</option><option>Ilustrasi Sains Edukatif</option><option>Minimalis Akademik</option><option>Infografis Warna Cerah</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-navy mb-1">Platform Tujuan AI</label>
+                                    <select id="mg-platform" class="w-full bg-surface text-sm px-3 py-2 rounded-lg border border-surface-border focus:outline-none focus:border-primary">
+                                        <option>Gemini / ChatGPT</option><option>Canva AI</option><option>Gamma App (Presentasi)</option><option>Midjourney / DALL-E</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="w-full bg-primary hover:bg-primary-dark text-white font-bold py-2.5 rounded-xl text-sm transition-all shadow-md flex items-center justify-center space-x-2 mt-4">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                <span>Hasilkan Prompt & Struktur Media</span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Output Result Column -->
+                    <div class="lg:col-span-7 bg-white rounded-2xl shadow-sm border border-surface-border p-6 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-4 pb-3 border-b border-surface-border">
+                                <h3 class="font-bold text-base text-navy flex items-center space-x-2">
+                                    <i class="fa-solid fa-file-lines text-cyan"></i>
+                                    <span>Hasil Rancangan & Prompt AI</span>
+                                </h3>
+                                <div id="mg-actions" class="hidden space-x-2">
+                                    <button onclick="copyGeneratedPrompt()" class="bg-surface hover:bg-primary hover:text-white text-navy px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors border border-surface-border">
+                                        <i class="fa-solid fa-copy mr-1"></i> Salin Prompt
+                                    </button>
+                                    <button onclick="saveMediaAsProject()" class="bg-primary hover:bg-primary-dark text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors">
+                                        <i class="fa-solid fa-floppy-disk mr-1"></i> Simpan ke Proyek
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="mg-output" class="text-xs text-slate-custom space-y-4 min-h-[350px] flex flex-col items-center justify-center text-center p-6 bg-surface rounded-xl border border-dashed border-surface-border">
+                                <div class="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center text-2xl mb-2">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                </div>
+                                <h4 class="font-bold text-sm text-navy">Belum ada prompt yang dihasilkan</h4>
+                                <p class="max-w-md text-slate-custom">Silakan isi formulir parameter di sebelah kiri dan klik tombol "Hasilkan Prompt & Struktur Media" untuk mulai merancang media pembelajaran berbasis AI.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        let currentGeneratedData = null;
+
+        function generateMediaPrompt(e) {
+            e.preventDefault();
+            const subject = document.getElementById('mg-subject').value;
+            const grade = document.getElementById('mg-grade').value;
+            const type = document.getElementById('mg-type').value;
+            const topic = document.getElementById('mg-topic').value;
+            const objective = document.getElementById('mg-objective').value;
+            const style = document.getElementById('mg-style').value;
+            const platform = document.getElementById('mg-platform').value;
+
+            currentGeneratedData = {
+                title: `${type} ${topic}`,
+                subject, grade, topic, type,
+                prompt: `Bertindaklah sebagai instructional designer dan spesialis media pembelajaran SMA profesional. Buatkan draf konten dan struktur lengkap untuk ${type} mata pelajaran ${subject} kelas ${grade} dengan topik "${topic}".\n\nTujuan Pembelajaran: ${objective}\nGaya Visual: ${style}\nTarget Platform: ${platform}\n\nBerikan hasil dalam bentuk struktur konten terperinci, urutan penyajian slide/bagian, teks narasi utama, serta instruksi visual yang jelas bagi guru.`
+            };
+
+            const outputDiv = document.getElementById('mg-output');
+            document.getElementById('mg-actions').classList.remove('hidden');
+
+            outputDiv.className = "text-xs text-slate-custom space-y-4 text-left p-4 bg-surface rounded-xl border border-surface-border max-h-[450px] overflow-y-auto custom-scrollbar";
+            outputDiv.innerHTML = `
+                <div>
+                    <span class="bg-primary/10 text-primary font-bold px-2.5 py-1 rounded-full uppercase text-[10px]">${type} • Kelas ${grade}</span>
+                    <h4 class="font-bold text-base text-navy mt-2">${currentGeneratedData.title}</h4>
+                    <div class="text-xs text-slate-custom mt-1">Mata Pelajaran: <strong>${subject}</strong> | Topik: <strong>${topic}</strong></div>
+                </div>
+                <div class="space-y-2 pt-2 border-t border-surface-border">
+                    <h5 class="font-bold text-navy uppercase text-[11px]">1. Tujuan Pembelajaran</h5>
+                    <p class="text-slate-custom bg-white p-3 rounded-lg border border-surface-border">${objective}</p>
+                </div>
+                <div class="space-y-2">
+                    <h5 class="font-bold text-navy uppercase text-[11px]">2. Rekomendasi Struktur Konten</h5>
+                    <ul class="list-disc pl-4 space-y-1 text-slate-custom bg-white p-3 rounded-lg border border-surface-border">
+                        <li><strong>Bagian 1 (Pendahuluan):</strong> Apersepsi dan pertanyaan pemantik terkait ${topic}.</li>
+                        <li><strong>Bagian 2 (Inti Materi):</strong> Penjelasan konsep utama dengan diagram visual bergaya ${style}.</li>
+                        <li><strong>Bagian 3 (Studi Kasus / Aplikasi):</strong> Contoh penerapan nyata dalam kehidupan sehari-hari siswa SMA.</li>
+                        <li><strong>Bagian 4 (Evaluasi Singkat):</strong> Kuis refleksi pemahaman konsep dasar.</li>
+                    </ul>
+                </div>
+                <div class="space-y-2">
+                    <h5 class="font-bold text-navy uppercase text-[11px]">3. Prompt Siap Salin untuk ${platform}</h5>
+                    <div class="bg-navy text-white p-3 rounded-lg font-mono text-[11px] select-all leading-relaxed">${currentGeneratedData.prompt}</div>
+                </div>
+            `;
+            showToast('Prompt media berhasil dihasilkan!', 'success');
+        }
+
+        function copyGeneratedPrompt() {
+            if (!currentGeneratedData) return;
+            const textarea = document.createElement('textarea');
+            textarea.value = currentGeneratedData.prompt;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            showToast('Prompt berhasil disalin ke clipboard!', 'success');
+        }
+
+        function saveMediaAsProject() {
+            if (!currentGeneratedData) return;
+            const newProj = {
+                id: 'proj-' + Date.now(),
+                title: currentGeneratedData.title,
+                subject: currentGeneratedData.subject,
+                grade: currentGeneratedData.grade,
+                topic: currentGeneratedData.topic,
+                type: currentGeneratedData.type,
+                updated: new Date().toISOString().split('T')[0]
+            };
+            appData.projects.unshift(newProj);
+            saveAppData();
+            showToast('Media berhasil disimpan sebagai proyek baru!', 'success');
+        }
+    </script>
+
+    <script>
+        function renderQuestionGenerator(container) {
+            document.getElementById('page-title').innerText = 'Generator Soal & Asesmen Profesional';
+            document.getElementById('breadcrumb').innerHTML = '<span>Beranda</span><i class="fa-solid fa-chevron-right text-[10px]"></i><span class="font-medium text-primary">Generator Soal</span>';
+
+            container.innerHTML = `
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    <!-- Form Column -->
+                    <div class="lg:col-span-5 bg-white rounded-2xl shadow-sm border border-surface-border p-6">
+                        <h3 class="font-bold text-base text-navy flex items-center space-x-2 mb-4">
+                            <i class="fa-solid fa-brain text-primary"></i>
+                            <span>Parameter Pembuatan Soal</span>
+                        </h3>
+                        <form onsubmit="generateQuestions(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-navy mb-1">Mata Pelajaran</label>
+                                <select id="qg-subject" class="w-full bg-surface text-sm px-3 py-2 rounded-lg border border-surface-border focus:outline-none focus:border-primary">
+                                    <option>Biologi</option><option>Fisika</option><option>Kimia</option><option>Matematika</option><option>Bahasa Indonesia</option><option>Sejarah</option><option>Ekonomi</option>
+                                </select>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-bold text-navy mb-1">Kelas</label>
+                                    <select id="qg-grade" class="w-full bg-surface text-sm px-3 py-2 rounded-lg border border-surface-border focus:outline-none focus:border-primary">
+                                        <option>X</option><option>XI</option><option>XII</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-navy mb-1">Bentuk Soal</label>
+                                    <select id="qg-type" class="w-full bg-surface text-sm px-3 py-2 rounded-lg border border-surface-border focus:outline-none focus:border-primary">
+                                        <option>Pilihan Ganda</option><option>Pilihan Ganda Kompleks</option><option>Esai / Uraian</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-navy mb-1">Topik Pembelajaran</label>
+                                <input type="text" id="qg-topic" required placeholder="Cth: Laju Reaksi & Faktor Penentu" class="w-full bg-surface text-sm px-3 py-2 rounded-lg border border-surface-border focus:outline-none focus:border-primary">
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-bold text-navy mb-1">Tingkat Kognitif</label>
+                                    <select id="qg-cognitive" class="w-full bg-surface text-sm px-3 py-2 rounded-lg border border-surface-border focus:outline-none focus:border-primary">
+                                        <option>C3 (Aplikasi)</option><option>C4 (Analisis - HOTS)</option><option>C5 (Evaluasi - HOTS)</option><option>C6 (Kreasi - HOTS)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-navy mb-1">Tingkat Kesulitan</label>
+                                    <select id="qg-difficulty" class="w-full bg-surface text-sm px-3 py-2 rounded-lg border border-surface-border focus:outline-none focus:border-primary">
+                                        <option>Sedang</option><option>Sukar (HOTS)</option><option>Mudah</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-navy mb-1">Jumlah Butir Soal</label>
+                                <select id="qg-count" class="w-full bg-surface text-sm px-3 py-2 rounded-lg border border-surface-border focus:outline-none focus:border-primary">
+                                    <option value="1">1 Butir Soal</option><option value="3" selected>3 Butir Soal</option><option value="5">5 Butir Soal</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="w-full bg-primary hover:bg-primary-dark text-white font-bold py-2.5 rounded-xl text-sm transition-all shadow-md flex items-center justify-center space-x-2 mt-4">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                <span>Generate Soal & Pembahasan</span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Output Preview Column -->
+                    <div class="lg:col-span-7 bg-white rounded-2xl shadow-sm border border-surface-border p-6 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-4 pb-3 border-b border-surface-border">
+                                <h3 class="font-bold text-base text-navy flex items-center space-x-2">
+                                    <i class="fa-solid fa-list-check text-cyan"></i>
+                                    <span>Hasil Soal & Kunci Jawaban</span>
+                                </h3>
+                                <button id="save-all-q-btn" onclick="saveGeneratedQuestions()" class="hidden bg-primary hover:bg-primary-dark text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors">
+                                    <i class="fa-solid fa-floppy-disk mr-1"></i> Simpan Semua ke Bank Soal
+                                </button>
+                            </div>
+                            <div id="qg-output" class="text-xs text-slate-custom space-y-4 min-h-[350px] flex flex-col items-center justify-center text-center p-6 bg-surface rounded-xl border border-dashed border-surface-border">
+                                <div class="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center text-2xl mb-2">
+                                    <i class="fa-solid fa-brain"></i>
+                                </div>
+                                <h4 class="font-bold text-sm text-navy">Belum ada soal yang dihasilkan</h4>
+                                <p class="max-w-md text-slate-custom">Tentukan parameter soal di sebelah kiri dan klik tombol generate untuk membuat soal asesmen berkualitas tinggi.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        let generatedQuestionsCache = [];
+
+        function generateQuestions(e) {
+            e.preventDefault();
+            const subject = document.getElementById('qg-subject').value;
+            const grade = document.getElementById('qg-grade').value;
+            const topic = document.getElementById('qg-topic').value;
+            const cognitive = document.getElementById('qg-cognitive').value;
+            const difficulty = document.getElementById('qg-difficulty').value;
+
+            generatedQuestionsCache = [
+                {
+                    id: 'gen-' + Date.now() + '-1',
+                    subject, grade, topic,
+                    cognitive, difficulty,
+                    type: 'Pilihan Ganda',
+                    question: `Berdasarkan analisis konsep ${topic} dalam mata pelajaran ${subject}, manakah pernyataan berikut yang paling tepat menggambarkan prinsip utama fenomena tersebut?`,
+                    options: ['Pernyataan A mengenai aspek fundamental sistem', 'Pernyataan B yang menyatakan hubungan sebab-akibat langsung', 'Pernyataan C sebagai anomali eksperimental', 'Pernyataan D yang tidak relevan dengan teori', 'Pernyataan E sebagai kesimpulan akhir'],
+                    correct: 1,
+                    discussion: `Pernyataan B adalah jawaban benar karena sesuai dengan prinsip fundamental ${topic} pada level kognitif ${cognitive}.`,
+                    verified: false
+                },
+                {
+                    id: 'gen-' + Date.now() + '-2',
+                    subject, grade, topic,
+                    cognitive, difficulty,
+                    type: 'Pilihan Ganda',
+                    question: `Dalam suatu eksperimen terkait ${topic}, seorang siswa mengamati adanya perubahan signifikan. Faktor manakah yang paling dominan mempengaruhi hasil tersebut?`,
+                    options: ['Konsentrasi dan suhu sistem', 'Waktu pengamatan awal', 'Volume wadah reaksi', 'Massa jenis zat terlarut', 'Tekanan udara luar'],
+                    correct: 0,
+                    discussion: 'Konsentrasi dan suhu adalah faktor kinetik utama yang mempercepat laju reaksi/perubahan.',
+                    verified: false
+                }
+            ];
+
+            const outputDiv = document.getElementById('qg-output');
+            document.getElementById('save-all-q-btn').classList.remove('hidden');
+
+            outputDiv.className = "text-xs text-slate-custom space-y-4 text-left p-4 bg-surface rounded-xl border border-surface-border max-h-[450px] overflow-y-auto custom-scrollbar";
+            outputDiv.innerHTML = generatedQuestionsCache.map((q, idx) => `
+                <div class="bg-white p-4 rounded-xl border border-surface-border space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="bg-primary/10 text-primary font-bold px-2.5 py-1 rounded-full text-[10px]">Soal #${idx + 1} • ${q.cognitive} • ${q.difficulty}</span>
+                        <span class="text-[10px] text-amber-600 font-semibold"><i class="fa-solid fa-triangle-exclamation"></i> Perlu Ditinjau Guru</span>
+                    </div>
+                    <p class="font-bold text-navy text-sm">${q.question}</p>
+                    <div class="space-y-1 pl-2">
+                        ${q.options.map((opt, oIdx) => `
+                            <div class="flex items-center space-x-2 ${oIdx === q.correct ? 'text-emerald-700 font-bold' : ''}">
+                                <span class="w-5 h-5 rounded-full bg-surface border border-surface-border flex items-center justify-center text-[10px]">${String.fromCharCode(65 + oIdx)}</span>
+                                <span>${opt}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="mt-2 pt-2 border-t border-surface-border text-[11px] text-slate-custom">
+                        <strong>Pembahasan:</strong> ${q.discussion}
+                    </div>
+                </div>
+            `).join('');
+
+            showToast('Soal berhasil digenerate!', 'success');
+        }
+
+        function saveGeneratedQuestions() {
+            if (!generatedQuestionsCache.length) return;
+            generatedQuestionsCache.forEach(q => appData.questions.unshift(q));
+            saveAppData();
+            showToast('Semua soal berhasil disimpan ke Bank Soal!', 'success');
+        }
+
+        function renderQuestionBank(container) {
+            document.getElementById('page-title').innerText = 'Bank Soal & Kisi-Kisi Asesmen';
+            document.getElementById('breadcrumb').innerHTML = '<span>Beranda</span><i class="fa-solid fa-chevron-right text-[10px]"></i><span class="font-medium text-primary">Bank Soal</span>';
+
+            container.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-sm border border-surface-border p-6 mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <div>
+                        <h3 class="font-bold text-lg text-navy">Penyimpanan & Pengelolaan Soal</h3>
+                        <p class="text-xs text-slate-custom">Semua butir soal tersimpan dengan kunci jawaban, pembahasan, dan tingkat kognitif.</p>
+                    </div>
+                    <button onclick="navigate('question-generator')" class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-xl text-sm font-bold shadow transition-all flex items-center space-x-2">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Buat Soal Baru</span>
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-surface-border p-6">
+                    <div class="space-y-4">
+                        ${appData.questions.map((q, idx) => `
+                            <div class="p-4 rounded-xl border border-surface-border hover:border-primary/50 transition-all bg-surface/50 space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-2">
+                                        <span class="bg-primary/10 text-primary font-bold px-2.5 py-1 rounded-full text-[10px]">#${idx + 1} • ${q.subject} (Kelas ${q.grade})</span>
+                                        <span class="bg-cyan/10 text-cyan-dark font-bold px-2.5 py-1 rounded-full text-[10px]">${q.cognitive} • ${q.difficulty}</span>
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <button onclick="deleteQuestion('${q.id}')" class="text-slate-custom hover:text-rose-600 transition-colors p-1.5" title="Hapus Soal">
+                                            <i class="fa-solid fa-trash text-xs"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <h4 class="font-bold text-sm text-navy">${q.question}</h4>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pl-2">
+                                    ${q.options.map((opt, oIdx) => `
+                                        <div class="text-xs flex items-center space-x-2 ${oIdx === q.correct ? 'text-emerald-700 font-bold' : 'text-slate-custom'}">
+                                            <span>${String.fromCharCode(65 + oIdx)}.</span>
+                                            <span>${opt}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                <div class="pt-2 border-t border-surface-border text-xs text-slate-custom">
+                                    <strong>Pembahasan:</strong> ${q.discussion}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function deleteQuestion(id) {
+            appData.questions = appData.questions.filter(q => q.id !== id);
+            saveAppData();
+            renderQuestionBank(document.getElementById('main-content'));
+            showToast('Soal berhasil dihapus dari bank soal.', 'success');
+        }
+    </script>
+
+    <script>
+        function renderInteractiveQuiz(container) {
+            document.getElementById('page-title').innerText = 'Kuis Interaktif Pembelajaran';
+            document.getElementById('breadcrumb').innerHTML = '<span>Beranda</span><i class="fa-solid fa-chevron-right text-[10px]"></i><span class="font-medium text-primary">Kuis Interaktif</span>';
+
+            container.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-sm border border-surface-border p-6 mb-6">
+                    <h3 class="font-bold text-lg text-navy">Pilih Paket Kuis Siap Main</h3>
+                    <p class="text-xs text-slate-custom mt-1">Uji pemahaman peserta didik atau gunakan sebagai evaluasi formatif langsung di kelas.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    ${appData.quizzes.map(qz => `
+                        <div class="bg-white rounded-2xl shadow-sm border border-surface-border p-6 flex flex-col justify-between hover:border-primary/50 transition-all">
+                            <div>
+                                <div class="flex items-center justify-between mb-3">
+                                    <span class="text-xs bg-primary/10 text-primary font-bold px-2.5 py-1 rounded-full">${qz.subject} • Kelas ${qz.grade}</span>
+                                    <span class="text-xs text-slate-custom"><i class="fa-solid fa-circle-question mr-1"></i> ${qz.questions.length} Soal</span>
+                                </div>
+                                <h4 class="font-bold text-base text-navy">${qz.title}</h4>
+                                <p class="text-xs text-slate-custom mt-2 leading-relaxed">${qz.description}</p>
+                            </div>
+                            <div class="mt-6 pt-4 border-t border-surface-border">
+                                <button onclick="startQuiz('${qz.id}')" class="w-full bg-primary hover:bg-primary-dark text-white font-bold py-2.5 rounded-xl text-xs transition-all shadow flex items-center justify-center space-x-2">
+                                    <i class="fa-solid fa-play"></i>
+                                    <span>Mulai Kuis Ini</span>
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        let activeQuizState = null;
+
+        function startQuiz(quizId) {
+            const qz = appData.quizzes.find(item => item.id === quizId);
+            if (!qz) return;
+
+            activeQuizState = {
+                quiz: qz,
+                currentIndex: 0,
+                score: 0,
+                selectedAnswers: Array(qz.questions.length).fill(null),
+                submitted: false
+            };
+
+            renderActiveQuizPlayer();
+        }
+
+        function renderActiveQuizPlayer() {
+            const container = document.getElementById('main-content');
+            const { quiz, currentIndex, selectedAnswers, submitted } = activeQuizState;
+            const currentQ = quiz.questions[currentIndex];
+
+            container.innerHTML = `
+                <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-sm border border-surface-border p-8">
+                    <div class="flex items-center justify-between pb-4 border-b border-surface-border mb-6">
+                        <div>
+                            <span class="text-xs bg-primary/10 text-primary font-bold px-2.5 py-1 rounded-full">${quiz.title}</span>
+                            <h4 class="font-bold text-lg text-navy mt-2">Soal ${currentIndex + 1} dari ${quiz.questions.length}</h4>
+                        </div>
+                        <button onclick="renderInteractiveQuiz(document.getElementById('main-content'))" class="text-xs font-bold text-slate-custom hover:text-rose-600">
+                            <i class="fa-solid fa-xmark mr-1"></i> Keluar Kuis
+                        </button>
+                    </div>
+
+                    <div class="space-y-6">
+                        <p class="font-bold text-navy text-base leading-relaxed">${currentQ.q}</p>
+
+                        <div class="space-y-3">
+                            ${currentQ.options.map((opt, oIdx) => `
+                                <button onclick="selectQuizOption(${oIdx})" class="w-full text-left p-4 rounded-xl border transition-all flex items-center space-x-3 ${selectedAnswers[currentIndex] === oIdx ? 'border-primary bg-primary/10 font-bold text-navy' : 'border-surface-border hover:bg-surface text-slate-custom'}">
+                                    <span class="w-7 h-7 rounded-full bg-white border border-surface-border flex items-center justify-center text-xs font-bold flex-shrink-0">${String.fromCharCode(65 + oIdx)}</span>
+                                    <span class="text-sm">${opt}</span>
+                                </button>
+                            `).join('')}
+                        </div>
+
+                        ${submitted ? `
+                            <div class="p-4 rounded-xl bg-surface border border-surface-border text-xs text-slate-custom">
+                                <strong>Penjelasan:</strong> ${currentQ.explanation}
+                            </div>
+                        ` : ''}
+
+                        <div class="flex items-center justify-between pt-4 border-t border-surface-border">
+                            <button onclick="prevQuizQuestion()" ${currentIndex === 0 ? 'disabled' : ''} class="px-4 py-2 rounded-xl border border-surface-border text-xs font-bold text-navy disabled:opacity-50">
+                                <i class="fa-solid fa-arrow-left mr-1"></i> Sebelumnya
+                            </button>
+                            ${currentIndex === quiz.questions.length - 1 ? `
+                                <button onclick="submitQuiz()" class="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow transition-all">
+                                    Selesai & Lihat Skor <i class="fa-solid fa-check ml-1"></i>
+                                </button>
+                            ` : `
+                                <button onclick="nextQuizQuestion()" class="px-6 py-2 bg-primary hover:bg-primary-dark text-white rounded-xl text-xs font-bold shadow transition-all">
+                                    Selanjutnya <i class="fa-solid fa-arrow-right ml-1"></i>
+                                </button>
+                            `}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function selectQuizOption(oIdx) {
+            activeQuizState.selectedAnswers[activeQuizState.currentIndex] = oIdx;
+            renderActiveQuizPlayer();
+        }
+
+        function nextQuizQuestion() {
+            if (activeQuizState.currentIndex < activeQuizState.quiz.questions.length - 1) {
+                activeQuizState.currentIndex++;
+                renderActiveQuizPlayer();
+            }
+        }
+
+        function prevQuizQuestion() {
+            if (activeQuizState.currentIndex > 0) {
+                activeQuizState.currentIndex--;
+                renderActiveQuizPlayer();
+            }
+        }
+
+        function submitQuiz() {
+            let score = 0;
+            activeQuizState.quiz.questions.forEach((q, idx) => {
+                if (activeQuizState.selectedAnswers[idx] === q.correct) {
+                    score += (100 / activeQuizState.quiz.questions.length);
+                }
+            });
+            activeQuizState.score = Math.round(score);
+            activeQuizState.submitted = true;
+
+            const container = document.getElementById('main-content');
+            container.innerHTML = `
+                <div class="max-w-xl mx-auto bg-white rounded-2xl shadow-sm border border-surface-border p-8 text-center space-y-6">
+                    <div class="w-20 h-20 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-4xl mx-auto shadow-inner">
+                        <i class="fa-solid fa-award"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-extrabold text-2xl text-navy">Kuis Selesai!</h3>
+                        <p class="text-xs text-slate-custom mt-1">${activeQuizState.quiz.title}</p>
+                    </div>
+                    <div class="py-6 bg-surface rounded-2xl border border-surface-border">
+                        <div class="text-xs text-slate-custom uppercase font-semibold">Skor Akhir Anda</div>
+                        <div class="text-5xl font-extrabold text-primary mt-2">${activeQuizState.score} <span class="text-lg text-slate-custom">/ 100</span></div>
+                    </div>
+                    <div class="flex justify-center space-x-4 pt-2">
+                        <button onclick="renderInteractiveQuiz(document.getElementById('main-content'))" class="px-6 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-xl text-xs font-bold shadow transition-all">
+                            Kembali ke Daftar Kuis
+                        </button>
+                    </div>
+                </div>
+            `;
+            showToast('Kuis berhasil diselesaikan!', 'success');
+        }
+    </script>
+
+    <script>
+        function renderVideoGallery(container) {
+            document.getElementById('page-title').innerText = 'Galeri Video Pembelajaran YouTube';
+            document.getElementById('breadcrumb').innerHTML = '<span>Beranda</span><i class="fa-solid fa-chevron-right text-[10px]"></i><span class="font-medium text-primary">Galeri Video</span>';
+
+            container.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-sm border border-surface-border p-6 mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <div>
+                        <h3 class="font-bold text-lg text-navy">Katalog Video Edukasi Terverifikasi</h3>
+                        <p class="text-xs text-slate-custom">Penyematan video YouTube resmi dengan iframe aman dan mekanisme fallback.</p>
+                    </div>
+                    <button onclick="openAddVideoModal()" class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-xl text-sm font-bold shadow transition-all flex items-center space-x-2">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Tambah Video YouTube</span>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    ${appData.videos.map(v => `
+                        <div class="bg-white rounded-2xl shadow-sm border border-surface-border overflow-hidden flex flex-col justify-between hover:border-primary/50 transition-all">
+                            <div class="relative aspect-video bg-navy">
+                                <iframe 
+  src="https://www.youtube.com/embed/${v.youtubeId}" 
+  title="${v.title}"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  allowfullscreen
+  loading="lazy"
+  referrerpolicy="no-referrer-when-downgrade"
+  class="w-full h-full border-0"
+></iframe>
+                            </div>
+                            <div class="p-5 flex-1 flex flex-col justify-between">
+                                <div>
+                                    <span class="text-xs bg-primary/10 text-primary font-bold px-2.5 py-1 rounded-full">${v.subject} • Kelas ${v.grade}</span>
+                                    <h4 class="font-bold text-base text-navy mt-2">${v.title}</h4>
+                                    <p class="text-xs text-slate-custom mt-1 leading-relaxed">${v.summary}</p>
+                                </div>
+                                <div class="mt-4 pt-3 border-t border-surface-border flex items-center justify-between">
+                                    <a href="https://youtu.be/${v.youtubeId}" target="_blank" class="text-xs font-bold text-primary hover:underline flex items-center space-x-1">
+                                        <span>Buka di YouTube</span>
+                                        <i class="fa-solid fa-external-link text-[10px]"></i>
+                                    </a>
+                                    <button onclick="deleteVideo('${v.id}')" class="text-slate-custom hover:text-rose-600 transition-colors text-xs">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function openAddVideoModal() {
+            openModal('Tambah Video YouTube', `
+                <form onsubmit="saveNewVideo(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-navy mb-1">Judul Video</label>
+                        <input type="text" id="nv-title" required placeholder="Cth: Animasi Sistem Peredaran Darah" class="w-full bg-surface text-sm px-3 py-2 rounded-lg border border-surface-border focus:outline-none focus:border-primary">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-navy mb-1">Mata Pelajaran</label>
+                            <select id="nv-subject" class="w-full bg-surface text-sm px-3 py-2 rounded-lg border border-surface-border focus:outline-none focus:border-primary">
+                                <option>Biologi</option><option>Fisika</option><option>Kimia</option><option>Matematika</option><option>Sejarah</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-navy mb-1">Kelas</label>
+                            <select id="nv-grade" class="w-full bg-surface text-sm px-3 py-2 rounded-lg border border-surface-border focus:outline-none focus:border-primary">
+                                <option>X</option><option>XI</option><option>XII</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-navy mb-1">ID Video YouTube atau URL</label>
+                        <input type="text" id="nv-url" required placeholder="Cth: g7z7ivz8x_4 atau https://youtu.be/..." class="w-full bg-surface text-sm px-3 py-2 rounded-lg border border-surface-border focus:outline-none focus:border-primary">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-navy mb-1">Ringkasan / Deskripsi Singkat</label>
+                        <textarea id="nv-summary" rows="2" required placeholder="Deskripsi isi video pembelajaran..." class="w-full bg-surface text-sm px-3 py-2 rounded-lg border border-surface-border focus:outline-none focus:border-primary"></textarea>
+                    </div>
+                    <div class="flex justify-end space-x-2 pt-3 border-t border-surface-border">
+                        <button type="button" onclick="closeModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-xs font-medium">Batal</button>
+                        <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg text-xs font-bold hover:bg-primary-dark">Simpan Video</button>
+                    </div>
+                </form>
+            `);
+        }
+
+        function saveNewVideo(e) {
+            e.preventDefault();
+            const rawUrl = document.getElementById('nv-url').value;
+            let youtubeId = rawUrl;
+            if (rawUrl.includes('youtu.be/')) {
+                youtubeId = rawUrl.split('youtu.be/')[1].split('?')[0];
+            } else if (rawUrl.includes('watch?v=')) {
+                youtubeId = rawUrl.split('watch?v=')[1].split('&')[0];
+            }
+
+            const newVid = {
+                id: 'vid-' + Date.now(),
+                title: document.getElementById('nv-title').value,
+                subject: document.getElementById('nv-subject').value,
+                grade: document.getElementById('nv-grade').value,
+                topic: 'Topik Pembelajaran',
+                youtubeId,
+                summary: document.getElementById('nv-summary').value
+            };
+
+            appData.videos.unshift(newVid);
+            saveAppData();
+            closeModal();
+            renderVideoGallery(document.getElementById('main-content'));
+        }
+
+        function deleteVideo(id) {
+            appData.videos = appData.videos.filter(v => v.id !== id);
+            saveAppData();
+            renderVideoGallery(document.getElementById('main-content'));
+            showToast('Video berhasil dihapus.', 'success');
+        }
+
+        function renderMaterials(container) {
+            document.getElementById('page-title').innerText = 'Bank Materi Pembelajaran';
+            document.getElementById('breadcrumb').innerHTML = '<span>Beranda</span><i class="fa-solid fa-chevron-right text-[10px]"></i><span class="font-medium text-primary">Bank Materi</span>';
+
+            container.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-sm border border-surface-border p-6 mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <div>
+                        <h3 class="font-bold text-lg text-navy">Penyimpanan Ringkasan & Modul Materi</h3>
+                        <p class="text-xs text-slate-custom">Gunakan materi ini sebagai sumber rujukan generator media dan soal.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    ${appData.materials.map(m => `
+                        <div class="bg-white rounded-2xl shadow-sm border border-surface-border p-6 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between mb-3">
+                                    <span class="text-xs bg-primary/10 text-primary font-bold px-2.5 py-1 rounded-full">${m.subject} • Kelas ${m.grade} (Sem ${m.semester})</span>
+                                    <span class="text-xs text-emerald-600 font-semibold"><i class="fa-solid fa-circle-check"></i> Terverifikasi</span>
+                                </div>
+                                <h4 class="font-bold text-base text-navy">${m.title}</h4>
+                                <p class="text-xs text-slate-custom mt-2 leading-relaxed">${m.content}</p>
+                            </div>
+                            <div class="mt-6 pt-4 border-t border-surface-border flex items-center justify-between">
+                                <span class="text-xs text-slate-custom">Topik: <strong>${m.topic}</strong></span>
+                                <button onclick="openMaterialDetail('${m.id}')" class="text-xs font-bold text-primary hover:underline">Baca Selengkapnya</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function openMaterialDetail(id) {
+            const m = appData.materials.find(item => item.id === id);
+            if (!m) return;
+            openModal(m.title, `
+                <div class="space-y-4">
+                    <div class="text-xs text-primary font-bold uppercase">${m.subject} • Kelas ${m.grade} • Semester ${m.semester}</div>
+                    <p class="text-xs text-slate-custom leading-relaxed bg-surface p-4 rounded-xl border border-surface-border">${m.content}</p>
+                </div>
+            `);
+        }
+    </script>
+
+    <script>
+        function renderTrainingCenter(container) {
+            document.getElementById('page-title').innerText = 'Pusat Pelatihan Guru (10 Modul)';
+            document.getElementById('breadcrumb').innerHTML = '<span>Beranda</span><i class="fa-solid fa-chevron-right text-[10px]"></i><span class="font-medium text-primary">Modul Pelatihan</span>';
+
+            const modules = [
+                { num: 1, title: 'Orientasi Pembelajaran Digital & Media Interaktif', desc: 'Pentingnya media pembelajaran, kebutuhan guru SMA, kesesuaian media dengan tujuan, dan peran guru dalam era digital.' },
+                { num: 2, title: 'Dasar AI Generatif untuk Pendidik', desc: 'Pengertian AI generatif, perbedaan chatbot, generator gambar, presentasi, dan kuis, serta peluang dan keterbatasannya.' },
+                { num: 3, title: 'Teknik Menyusun Prompt (Prompt Engineering)', desc: 'Struktur prompt profesional: Peran, Konteks, Mata Pelajaran, Kelas, Tujuan, Tugas, Format, dan Kriteria Kualitas.' },
+                { num: 4, title: 'Membuat Media Visual & Infografis', desc: 'Prinsip desain visual, infografis, poster, peta konsep, komik edukasi, serta pemilihan warna dan tipografi.' },
+                { num: 5, title: 'Membuat Presentasi Interaktif dengan AI', desc: 'Struktur presentasi 10 slide yang efektif, alur penjelasan, menghindari teks berlebihan, dan membuat pertanyaan pemantik.' },
+                { num: 6, title: 'Membuat Video & Memanfaatkan YouTube', desc: 'Perencanaan video pembelajaran, penulisan naskah, storyboard, penyematan video, dan penanganan fallback.' },
+                { num: 7, title: 'Membuat Soal Berkualitas & HOTS', desc: 'Asesmen diagnostik, formatif, sumatif, kisi-kisi, indikator, Taksonomi Bloom C1-C6, dan rubrik esai.' },
+                { num: 8, title: 'Membuat Kuis Interaktif & Penilaian', desc: 'Mengubah soal menjadi kuis digital, umpan balik, timer, membaca hasil, dan perbaikan pembelajaran.' },
+                { num: 9, title: 'Platform Digital, Etika & Keamanan AI', desc: 'Pemanfaatan Gemini, Canva, Wordwall, privasi siswa, hak cipta, bias, dan transparansi AI.' },
+                { num: 10, title: 'Praktik Mandiri, Evaluasi & Tindak Lanjut', desc: 'Panduan praktik membuat media visual, 5 soal terverifikasi, 1 kuis interaktif, serta rencana tindak lanjut.' }
+            ];
+
+            container.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-sm border border-surface-border p-6 mb-6">
+                    <h3 class="font-bold text-lg text-navy">Modul Pelatihan Resmi Pelatihan Guru</h3>
+                    <p class="text-xs text-slate-custom mt-1">“PEMBUATAN MEDIA VISUAL DAN KUIS INTERAKTIF MENGGUNAKAN TEKNOLOGI AI DAN PLATFORM DIGITAL”</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    ${modules.map(mod => `
+                        <div class="bg-white rounded-2xl shadow-sm border border-surface-border p-6 flex flex-col justify-between hover:border-primary/50 transition-all">
+                            <div>
+                                <div class="flex items-center justify-between mb-3">
+                                    <span class="text-xs bg-primary/10 text-primary font-bold px-2.5 py-1 rounded-full">Modul ${mod.num} dari 10</span>
+                                    <span class="text-xs text-emerald-600 font-semibold"><i class="fa-solid fa-circle-check"></i> Siap Dipelajari</span>
+                                </div>
+                                <h4 class="font-bold text-base text-navy">${mod.title}</h4>
+                                <p class="text-xs text-slate-custom mt-2 leading-relaxed">${mod.desc}</p>
+                            </div>
+                            <div class="mt-6 pt-4 border-t border-surface-border flex items-center justify-between">
+                                <span class="text-xs text-slate-custom">Durasi: 45 Menit</span>
+                                <button onclick="openModuleDetail(${mod.num})" class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-xl text-xs font-bold transition-all shadow">
+                                    Buka Modul
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function openModuleDetail(num) {
+            openModal(`Modul Pelatihan #${num}`, `
+                <div class="space-y-4">
+                    <div class="p-4 bg-primary/10 rounded-xl border border-primary/20 text-xs text-primary font-semibold">
+                        Modul Resmi Pelatihan AI Media Ajar Studio — Edisi Profesional SMA
+                    </div>
+                    <p class="text-xs text-slate-custom leading-relaxed">
+                        Modul ini dirancang khusus untuk membimbing guru SMA dalam menguasai teknologi kecerdasan buatan secara praktis, etis, dan aplikatif di dalam kelas. Ikuti setiap langkah latihan dan evaluasi untuk memastikan pencapaian kompetensi digital Anda.
+                    </p>
+                    <div class="space-y-2 pt-2 border-t border-surface-border">
+                        <h5 class="font-bold text-navy text-xs uppercase">Poin Utama Pembelajaran</h5>
+                        <ul class="list-disc pl-4 space-y-1 text-xs text-slate-custom">
+                            <li>Konsep teoritis berbasis kurikulum merdeka.</li>
+                            <li>Contoh kasus nyata di kelas SMA.</li>
+                            <li>Langkah kerja menggunakan AI Media Ajar Studio.</li>
+                            <li>Rubrik penilaian dan evaluasi mandiri.</li>
+                        </ul>
+                    </div>
+                </div>
+            `);
+        }
+    </script>
+
+    <script>
+        function renderPresentation(container) {
+            document.getElementById('page-title').innerText = 'Presentasi Pelatihan (32 Slide)';
+            document.getElementById('breadcrumb').innerHTML = '<span>Beranda</span><i class="fa-solid fa-chevron-right text-[10px]"></i><span class="font-medium text-primary">Presentasi Pelatihan</span>';
+
+            container.innerHTML = `
+                <div class="bg-gradient-to-r from-navy to-primary rounded-2xl p-8 text-white shadow-xl mb-6 flex flex-col md:flex-row justify-between items-center">
+                    <div>
+                        <span class="bg-cyan/20 text-cyan text-xs font-bold px-3 py-1 rounded-full uppercase">Mode Presentasi Interaktif</span>
+                        <h3 class="text-2xl font-extrabold mt-2">Dek Slide Resmi Pelatihan (32 Slide Lengkap)</h3>
+                        <p class="text-xs text-white/80 mt-1 max-w-xl">Dilengkapi dengan catatan pemateri, poin utama, dan navigasi layar penuh untuk pelatihan berjam-jam.</p>
+                    </div>
+                    <button onclick="launchFullscreenPresentation()" class="mt-4 md:mt-0 bg-cyan hover:bg-cyan-dark text-navy font-bold px-6 py-3 rounded-xl text-sm shadow-lg transition-all flex items-center space-x-2">
+                        <i class="fa-solid fa-expand"></i>
+                        <span>Mulai Layar Penuh</span>
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-surface-border p-6">
+                    <h4 class="font-bold text-base text-navy mb-4">Daftar Slide Presentasi</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                        ${Array.from({length: 32}, (_, i) => `
+                            <button onclick="launchFullscreenPresentation(${i})" class="p-4 rounded-xl border border-surface-border hover:border-primary hover:bg-surface transition-all text-left group">
+                                <div class="text-[10px] font-bold text-primary mb-1">Slide ${i + 1} dari 32</div>
+                                <div class="font-bold text-xs text-navy group-hover:text-primary line-clamp-2">Topik Pelatihan Sesi ${i + 1}</div>
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+const presentationSlides = Array.from({length: 32}, (_, i) => {
+  const slideData = {
+    num: i + 1,
+    title: '',
+    points: [],
+    notes: ''
+  };
+
+  switch (i) {
+    case 0:
+      slideData.title = 'Sampul — AI Media Ajar Studio';
+      slideData.points = [
+        'Judul Pelatihan: Pembuatan Media Visual & Kuis Interaktif Berbantuan Kecerdasan Buatan',
+        'Penyelenggara: Dinas Pendidikan / Pusat Pengembangan Pendidikan',
+        'Pengembang: Azhari, S.Kom',
+        'Tanggal: 17 Oktober 2026'
+      ];
+      slideData.notes = 'Sapa peserta, perkenalkan diri dan tim, jelaskan tujuan serta cakupan materi pelatihan.';
+      break;
+
+    case 1:
+      slideData.title = 'Tujuan & Hasil yang Diharapkan';
+      slideData.points = [
+        'Memahami konsep dasar kecerdasan buatan dalam pendidikan',
+        'Mampu menyusun prompt efektif untuk menghasilkan media pembelajaran',
+        'Mampu membuat infografis, presentasi, video, dan kuis interaktif',
+        'Menguasai pemanfaatan platform digital pendukung pembelajaran',
+        'Menyusun rencana tindak lanjut penerapan di kelas masing-masing'
+      ];
+      slideData.notes = 'Tekankan bahwa fokus pelatihan adalah praktik langsung, bukan sekadar teori. Setiap peserta diharapkan menghasilkan karya nyata.';
+      break;
+
+    case 2:
+      slideData.title = 'Mengapa Media Digital Penting?';
+      slideData.points = [
+        'Meningkatkan daya tarik dan keterlibatan siswa dalam pembelajaran',
+        'Memfasilitasi pemahaman konsep abstrak melalui visualisasi',
+        'Mendukung pembelajaran berdiferensiasi sesuai gaya belajar siswa',
+        'Mempermudah pemantauan dan evaluasi pemahaman secara langsung',
+        'Sesuai dengan perkembangan Kurikulum Merdeka dan kebutuhan generasi digital'
+      ];
+      slideData.notes = 'Berikan contoh pengalaman nyata: bagaimana media yang menarik mengubah respon dan antusiasme siswa di kelas.';
+      break;
+
+    case 3:
+      slideData.title = 'Peran dan Tantangan Guru di Era Digital';
+      slideData.points = [
+        'Guru sebagai fasilitator, bukan sekadar penyampai informasi',
+        'Tantangan: keterbatasan waktu, keterampilan, dan akses sarana prasarana',
+        'Peluang: teknologi dapat meringankan beban administrasi dan perancangan',
+        'Pemanfaatan AI bukan untuk menggantikan guru, melainkan memperkuat peran guru',
+        'Kompetensi digital adalah kebutuhan, bukan sekadar pilihan'
+      ];
+      slideData.notes = 'Ajak peserta berbagi pengalaman: apa kendala utama yang dihadapi saat ini? Catat dan tanggapi secara singkat.';
+      break;
+
+    case 4:
+      slideData.title = 'Gambaran Umum AI Media Ajar Studio';
+      slideData.points = [
+        'Platform terpadu berbasis penyimpanan lokal browser — aman dan mandiri',
+        'Tersedia generator media, soal, kuis, materi, dan galeri video',
+        'Terintegrasi dengan platform eksternal: Gemini, Canva, ChatGPT, Wordwall',
+        'Semua data tersimpan di perangkat sendiri — tidak dikirim ke server luar',
+        'Dikembangkan oleh: Azhari, S.Kom — untuk kemajuan pendidikan di daerah kita'
+      ];
+      slideData.notes = 'Jelaskan bahwa aplikasi ini tidak memerlukan instalasi rumit, cukup simpan file dan buka di browser. Data tetap milik pengguna sepenuhnya.';
+      break;
+
+    case 5:
+      slideData.title = 'Pengenalan AI Generatif untuk Pendidik';
+      slideData.points = [
+        'Apa itu AI Generatif? Sistem yang mampu menghasilkan konten baru mandiri',
+        'Jenis yang relevan: teks (GPT/Gemini), gambar (Canva/Midjourney), data soal',
+        'Prinsip kerja: belajar dari pola data, bukan "mengerti" seperti manusia',
+        'Kelebihan: cepat, ide beragam, tidak lelah — alat bantu yang sangat produktif',
+        'Keterbatasan: bisa keliru, kurang konteks lokal, butuh verifikasi guru'
+      ];
+      slideData.notes = 'Tekankan: AI menghasilkan draf, guru yang memvalidasi dan menyesuaikan dengan kondisi siswa. Tanggung jawab konten tetap pada pendidik.';
+      break;
+
+    case 6:
+      slideData.title = 'Etika, Keamanan, dan Tanggung Jawab Penggunaan AI';
+      slideData.points = [
+        'Selalu tinjau dan perbaiki hasil AI sebelum digunakan di kelas',
+        'Jangan memasukkan data pribadi siswa ke dalam prompt publik',
+        'Hormati hak cipta: hasil buatan AI tetap perlu dinyatakan sumbernya',
+        'Hindari ketergantungan berlebih — pertahankan keaslian dan gaya mengajar Anda',
+        'Transparansi: beri tahu siswa kapan alat bantu teknologi digunakan'
+      ];
+      slideData.notes = 'Diskusikan bersama: sejauh mana kita mengungkapkan penggunaan AI kepada siswa? Bagaimana cara membimbing mereka juga menggunakannya secara bertanggung jawab?';
+      break;
+
+    case 7:
+      slideData.title = 'Memahami Struktur Prompt yang Efektif';
+      slideData.points = [
+        'Peran: tentukan identitas penulis konten (contoh: "Anda seorang guru biologi berpengalaman")',
+        'Konteks: sebutkan mata pelajaran, kelas, topik, dan latar belakang siswa',
+        'Tujuan: apa yang ingin dicapai dari konten tersebut?',
+        'Format: bentuk hasil yang diinginkan — daftar, paragraf, tabel, poin-poin',
+        'Kriteria: spesifikasikan panjang, gaya bahasa, dan standar kualitas'
+      ];
+      slideData.notes = 'Gunakan analogi: menulis prompt seperti memberi tugas kepada asisten baru — semakin jelas instruksinya, semakin tepat hasilnya.';
+      break;
+
+    case 8:
+      slideData.title = 'Anatomi Prompt yang Baik — Contoh Lengkap';
+      slideData.points = [
+        'Buruk: "Buatkan materi tentang sel" → terlalu umum, hasil kurang terarah',
+        'Baik: "Sebagai guru biologi SMA, buatkan ringkasan materi sel kelas XI tentang organel dan fungsinya. Gunakan bahasa sederhana, struktur poin-poin, maksimal 500 kata."',
+        'Semakin rinci instruksi, semakin sesuai hasil yang didapat',
+        'Gunakan pustaka template prompt yang sudah tersedia di aplikasi',
+        'Sesuaikan ulang hasil AI agar lebih sesuai dengan gaya bahasa Anda'
+      ];
+      slideData.notes = 'Tunjukkan langsung: buka menu "Template Prompt", salin, isi bagian kurung siku, lalu jalankan. Tunjukkan perbedaannya secara langsung.';
+      break;
+
+    case 9:
+      slideData.title = 'Praktik Langsung: Menulis Prompt Pertama';
+      slideData.points = [
+        'Buka menu "Generator Media" di aplikasi',
+        'Isi mata pelajaran, kelas, topik, dan tujuan pembelajaran',
+        'Pilih jenis media dan gaya visual yang diinginkan',
+        'Klik "Hasilkan Prompt" — salin hasilnya ke platform AI pilihan',
+        'Amati hasilnya, lalu perbaiki prompt jika belum sesuai'
+      ];
+      slideData.notes = 'Beri waktu 15–20 menit praktik langsung. Kelilingi peserta, bantu yang kesulitan. Tekankan: tidak perlu sempurna di percobaan pertama.';
+      break;
+
+    case 10:
+      slideData.title = 'Prinsip Desain Media Pembelajaran yang Baik';
+      slideData.points = [
+        'Satu ide utama per tampilan — jangan padatkan informasi',
+        'Kontras cukup: teks mudah dibaca di atas latar belakang',
+        'Konsistensi: palet warna, jenis huruf, dan gaya seragam',
+        'Kurangi teks panjang — ganti dengan gambar, ikon, atau bagan',
+        'Sesuaikan dengan usia dan latar belakang siswa'
+      ];
+      slideData.notes = 'Tunjukkan contoh perbandingan: media yang terlalu padat vs yang rapi dan terbaca jelas. Minta peserta mengamati kekurangan dan kelebihannya.';
+      break;
+
+    case 11:
+      slideData.title = 'Praktik Membuat Media Visual — Infografis & Poster';
+      slideData.points = [
+        'Buka generator media → pilih jenis "Infografis" atau "Poster Edukasi"',
+        'Salin hasil prompt ke Canva atau Gemini',
+        'Pilih desain yang bersih, tidak terlalu ramai',
+        'Susun informasi dari yang paling penting ke penunjang',
+        'Simpan proyek agar dapat diedit kembali nanti'
+      ];
+      slideData.notes = 'Tunjukkan contoh hasil yang sudah dibuat sebelumnya. Ajak peserta saling berbagi karya di sesi berikutnya.';
+      break;
+
+    case 12:
+      slideData.title = 'Menyusun Presentasi Pembelajaran yang Menarik';
+      slideData.points = [
+        'Struktur ideal: 10–12 slide per materi utama',
+        'Slide 1: Judul & Apersepsi — menarik perhatian di awal',
+        'Slide 2–7: Inti materi — urut dari konsep dasar ke penerapan',
+        'Slide 8–9: Refleksi & pertanyaan pemantik',
+        'Slide 10: Kesimpulan & tindak lanjut'
+      ];
+      slideData.notes = 'Tekankan: slide bukan naskah. Teks pendek, bantu dengan gambar, penjelasan lisan yang kaya.';
+      break;
+
+    case 13:
+      slideData.title = 'Panduan Penggunaan Canva for Education';
+      slideData.points = [
+        'Buka: canva.com → gunakan akun resmi pendidikan jika ada',
+        'Cari desain: gunakan kata kunci sederhana, lalu sesuaikan',
+        'Fitur AI: "Buat Desain" otomatis dengan memasukkan prompt',
+        'Ubah teks, gambar, warna agar sesuai identitas materi Anda',
+        'Unduh sebagai PDF atau gambar, lalu simpan ke proyek Anda'
+      ];
+      slideData.notes = 'Tunjukkan langsung antarmuka Canva. Jelaskan bahwa versi pendidikan gratis menyediakan fitur lengkap tanpa biaya.';
+      break;
+
+    case 14:
+      slideData.title = 'Pemanfaatan Video Pembelajaran';
+      slideData.points = [
+        'Video memperjelas proses yang sulit dilihat secara langsung',
+        'Galeri video di aplikasi menyematkan video YouTube dengan aman',
+        'Tambahkan ringkasan agar siswa tahu apa yang harus diperhatikan',
+        'Pilih video yang durasinya sesuai — 3–5 menit paling efektif',
+        'Tonton dulu sebelum ditayangkan di kelas untuk memastikan kesesuaian'
+      ];
+      slideData.notes = 'Diskusikan: kapan waktu yang tepat menayangkan video? Di awal untuk memancing rasa ingin tahu, atau di tengah untuk memperjelas konsep?';
+      break;
+
+    case 15:
+      slideData.title = 'Mencari & Menyematkan Video dari YouTube';
+      slideData.points = [
+        'Cari video dengan kata kunci spesifik: mata pelajaran + topik + "animasi" / "penjelasan"',
+        'Salin URL atau ID video → tempel di "Tambah Video" pada aplikasi',
+        'Sisipkan ringkasan isi video agar mudah diingat kembali',
+        'Aplikasi otomatis membuat tampilan pemutar yang aman dan responsif',
+        'Buka di perangkat seluler untuk memastikan tampilannya baik'
+      ];
+      slideData.notes = 'Praktik langsung: cari satu video sesuai mata pelajaran masing-masing, simpan ke galeri. Bantu yang kesulitan mengambil ID video.';
+      break;
+
+    case 16:
+      slideData.title = 'Prinsip Penyusunan Soal Berkualitas';
+      slideData.points = [
+        'Sesuaikan dengan indikator pencapaian tujuan pembelajaran',
+        'Gunakan kisi-kisi agar cakupan materi merata',
+        'Variasikan tingkat kognitif: tidak hanya mengingat, tetapi juga menganalisis dan mengevaluasi',
+        'Bahasa jelas, tidak bermakna ganda, sesuai tingkat pemahaman siswa',
+        'Sertakan pembahasan agar dapat digunakan sebagai bahan belajar mandiri'
+      ];
+      slideData.notes = 'Jelaskan perbedaan soal hafalan (C1–C2) dan soal pemecahan masalah (C3 ke atas). Tunjukkan contoh perbedaannya.';
+      break;
+
+    case 17:
+      slideData.title = 'Kisi-Kisi & Indikator Soal — Dasar Asesmen yang Baik';
+      slideData.points = [
+        'Kisi-kisi: peta antara materi, indikator, dan bentuk soal',
+        'Indikator: perilaku terukur yang menunjukkan siswa telah memahami',
+        'Contoh: "Mampu membedakan reaksi eksoterm dan endoterm berdasarkan perubahan suhu"',
+        'Tanpa kisi-kisi, soal cenderung tidak seimbang dan tidak terarah',
+        'Gunakan generator soal untuk membantu menyusun kerangkanya'
+      ];
+      slideData.notes = 'Bagikan contoh kisi-kisi lengkap. Minta peserta menyusun satu indikator untuk topik yang sedang mereka ajarkan.';
+      break;
+
+    case 18:
+      slideData.title = 'Mengenal Taksonomi Bloom & Soal HOTS';
+      slideData.points = [
+        'C1 Mengingat → menyebutkan, mendefinisikan, mencantumkan',
+        'C2 Memahami → menjelaskan, membandingkan, mengelompokkan',
+        'C3 Menerapkan → menggunakan, menyelesaikan masalah sederhana',
+        'C4 Menganalisis → menguraikan hubungan sebab-akibat, membedakan',
+        'C5–C6 Mengevaluasi & Mencipta → menilai, merancang, menyusun argumen'
+      ];
+      slideData.notes = 'Tekankan: HOTS bukan berarti soal sulit dengan pelajaran belum diajarkan — melainkan meminta siswa berpikir, bukan sekadar mengingat jawaban.';
+      break;
+
+    case 19:
+      slideData.title = 'Praktik Menyusun Soal HOTS dengan AI';
+      slideData.points = [
+        'Buka "Generator Soal" → lengkapi parameter: pelajaran, kelas, topik',
+        'Pilih tingkat kognitif C4–C5 dan kesulitan sesuai kebutuhan',
+        'Klik "Generate" → periksa hasilnya, sesuaikan bahasa jika perlu',
+        'Verifikasi jawaban dan pembahasan sebelum disimpan',
+        'Simpan ke Bank Soal — dapat digunakan kembali kapan saja'
+      ];
+      slideData.notes = 'Penting: hasil AI perlu ditinjau! Kadang jawaban yang dianggap benar ternyata kurang tepat. Peran guru memverifikasi tidak tergantikan.';
+      break;
+
+    case 20:
+      slideData.title = 'Mengelola Bank Soal & Revisi Berkala';
+      slideData.points = [
+        'Semua soal tersimpan di perangkat, dapat disaring dan diperbarui',
+        'Tandai soal yang sudah diuji di kelas dan berfungsi baik',
+        'Kumpulkan soal per topik untuk memudahkan penyusunan ulangan',
+        'Buat variasi soal agar siswa tidak saling mencontek',
+        'Ekspor data secara berkala untuk cadangan keamanan'
+      ];
+      slideData.notes = 'Ajarkan cara melakukan backup: buka Pengaturan → Ekspor Data. Simpan file JSON di tempat aman. Cara ini juga memudahkan pindah ke perangkat lain.';
+      break;
+
+    case 21:
+      slideData.title = 'Mengubah Soal Menjadi Kuis Interaktif';
+      slideData.points = [
+        'Kuis memberikan umpan balik langsung — siswa segera tahu jawabannya',
+        'Skor dihitung otomatis, memudahkan penilaian cepat',
+        'Bisa dimainkan secara mandiri atau berkelompok di kelas',
+        'Pilih soal dari Bank Soal → susun menjadi paket kuis',
+        'Sesuaikan jumlah soal agar tidak terlalu panjang (3–5 soal cukup untuk refleksi)'
+      ];
+      slideData.notes = 'Tunjukkan langsung cara memainkan kuis. Diskusikan: bagaimana suasana kelas saat kuis dimainkan? Bagaimana antusiasme siswa?';
+      break;
+
+    case 22:
+      slideData.title = 'Membuat Kuis yang Bermakna, Bukan Sekadar Permainan';
+      slideData.points = [
+        'Fokus pada pemahaman, bukan sekadar kecepatan menjawab',
+        'Sertakan penjelasan pada setiap jawaban — meskipun benar, siswa belajar lagi',
+        'Gunakan kuis di awal (pre-test), tengah (refleksi), atau akhir (evaluasi)',
+        'Hasil kuis bukan untuk menghukum, melainkan untuk mengetahui bagian yang perlu diulang',
+        'Variasikan bentuk kuis agar tidak membosankan'
+      ];
+      slideData.notes = 'Tekankan: suasana hati yang positif saat kuis membantu siswa berani mencoba. Jangan tekankan peringkat yang mempermalukan yang lambat.';
+      break;
+
+    case 23:
+      slideData.title = 'Pemanfaatan Platform Wordwall & Lainnya';
+      slideData.points = [
+        'Wordwall menyediakan berbagai jenis permainan: kuis, teka-teki, pasangan, roda keberuntungan',
+        'Buka dari menu "Platform Eksternal" di aplikasi',
+        'Buat dan simpan tautannya agar mudah dibuka di kelas',
+        'Sesuaikan dengan materi yang sedang dipelajari',
+        'Sederhanakan instruksi agar siswa cepat paham cara mainnya'
+      ];
+      slideData.notes = 'Tunjukkan beberapa contoh jenis permainan yang paling cocok untuk materi pelajaran peserta. Bagikan tautan contoh jika ada.';
+      break;
+
+    case 24:
+      slideData.title = 'Bank Materi — Sumber Referensi yang Terstruktur';
+      slideData.points = [
+        'Simpan ringkasan materi agar mudah diakses dan dikembangkan',
+        'Materi tersimpan menjadi dasar untuk membuat soal, media, maupun kuis',
+        'Tulis dengan bahasa yang Anda gunakan sehari-hari di kelas',
+        'Perbarui materi setiap kali mengajar — tambahkan catatan dan contoh baru',
+        'Bisa dibagikan kepada siswa sebagai bahan bacaan mandiri'
+      ];
+      slideData.notes = 'Praktik singkat: tuliskan ringkasan satu topik yang sering Anda ajarkan. Simpan ke Bank Materi. Lihat betapa bergunanya kumpulan ini setelah beberapa bulan.';
+      break;
+
+    case 25:
+      slideData.title = 'Kolaborasi & Berbagi Karya Antar Guru';
+      slideData.points = [
+        'Ekspor data → bagikan file JSON → impor ke perangkat rekan sejawat',
+        'Saling melengkapi kekurangan: yang pandai desain bantu media, yang teliti bantu soal',
+        'Bangun repositori bersama sekolah — kumpulan karya terbaik semua guru',
+        'Sesuaikan hasil karya rekan agar sesuai gaya dan kebutuhan kelas Anda',
+        'Berkolaborasi mengurangi beban kerja sekaligus meningkatkan kualitas'
+      ];
+      slideData.notes = 'Dorong terbentuknya kelompok kerja sama antar mata pelajaran atau tingkat kelas. Saling berbagi jauh lebih ringan daripada membuat semuanya sendiri.';
+      break;
+
+    case 26:
+      slideData.title = 'Keamanan Data & Cadangan Berkala';
+      slideData.points = [
+        'Semua data tersimpan di browser perangkat — tidak lewat server luar',
+        'Risiko: menghapus data browser atau ganti perangkat bisa kehilangan semua karya',
+        'Solusi: Ekspor Data secara berkala — simpan file JSON di Google Drive atau penyimpanan awan',
+        'Beri nama file dengan tanggal agar mudah menemukan versi terbaru',
+        'Lakukan ekspor sebelum memperbarui sistem atau menghapus riwayat penjelajahan'
+      ];
+      slideData.notes = 'Praktik langsung sekarang: buka Pengaturan → Ekspor Data → simpan file. Tunjukkan cara mengimpor kembali jika perlu.';
+      break;
+
+    case 27:
+      slideData.title = 'Mengatasi Kendala & Kesulitan Teknis';
+      slideData.points = [
+        'Aplikasi tidak memuat? Coba buka di browser lain (Chrome, Edge, Firefox)',
+        'Tampilan berantakan? Perbarui browser ke versi terbaru',
+        'Data hilang? Cek apakah ada pembersihan data otomatis di perangkat',
+        'Tidak ada internet? Aplikasi tetap berfungsi penuh secara luring',
+        'Bantuan dan pembaruan: hubungi pengembang — Azhari, S.Kom'
+      ];
+      slideData.notes = 'Catat kontak atau saluran tanya jawab yang tersedia. Tekankan: kesulitan itu wajar, tanya saja tanpa ragu.';
+      break;
+
+    case 28:
+      slideData.title = 'Evaluasi Mandiri Kemampuan Digital';
+      slideData.points = [
+        'Saya mampu menyusun prompt dasar untuk menghasilkan konten',
+        'Saya sudah membuat minimal satu media pembelajaran baru hari ini',
+        'Saya dapat menyusun soal dan mengubahnya menjadi kuis interaktif',
+        'Saya tahu cara menyimpan dan mencadangkan data karya saya',
+        'Saya berencana menerapkan minimal satu hal baru di kelas minggu depan'
+      ];
+      slideData.notes = 'Minta peserta menilai diri sendiri secara jujur. Tidak ada nilai yang diberikan — ini untuk perencanaan pengembangan diri masing-masing.';
+      break;
+
+    case 29:
+      slideData.title = 'Rencana Tindak Lanjut Penerapan di Sekolah';
+      slideData.points = [
+        'Apa satu hal pertama yang akan Anda coba di kelas?',
+        'Kapan waktu pelaksanaannya? Tentukan tanggalnya sekarang',
+        'Siapa rekan yang bisa diajak berdiskusi atau saling membantu?',
+        'Apa kendala yang mungkin muncul? Bagaimana cara mengatasinya?',
+        'Catat kemajuan dan hasilnya — jadikan pengalaman untuk berkembang'
+      ];
+      slideData.notes = 'Beri waktu menulis secara pribadi. Ini bukan untuk dikumpulkan, melainkan janji pada diri sendiri. Langkah kecil yang dimulai hari ini akan menjadi kebiasaan besar esok hari.';
+      break;
+
+    case 30:
+      slideData.title = 'Harapan & Komitmen Bersama';
+      slideData.points = [
+        'Teknologi hanyalah alat — yang terpenting adalah niat dan dedikasi Anda',
+        'Setiap karya yang Anda buat berdampak pada puluhan siswa yang Anda didik',
+        'Kesempurnaan butuh waktu — mulailah dari yang sederhana, perbaiki terus',
+        'Anda tidak sendirian — kami terus mendampingi proses pengembangan ini',
+        'Terima kasih atas dedikasi Anda untuk kemajuan pendidikan di daerah kita'
+      ];
+      slideData.notes = 'Sampaikan apresiasi yang tulus. Guru adalah pahlawan nyata di tengah masyarakat. Semangat Anda menginspirasi kami.';
+      break;
+
+    case 31:
+      slideData.title = 'Sumber Belajar & Referensi Tambahan';
+      slideData.points = [
+        'Kurikulum Merdeka — Kemendikbudristek',
+        'Bahan Pelatihan Pemanfaatan Teknologi Informasi dan Komunikasi',
+        'Panduan Asesmen Pembelajaran',
+        'Canva for Education — Sumber daya pendidik',
+        'Dikembangkan oleh: Azhari, S.Kom — Masukan dan saran sangat dihargai'
+      ];
+      slideData.notes = 'Bagikan tautan atau berkas referensi jika tersedia. Undang peserta memberikan masukan untuk pengembangan versi berikutnya.';
+      break;
+
+    case 32:
+      slideData.title = 'Penutup & Doa';
+      slideData.points = [
+        'Semoga ilmu yang didapat bermanfaat dan membawa keberkahan',
+        'Semoga semakin mudah mencerahkan anak-anak bangsa',
+        'Kami siap mendampingi jika ada kendala maupun masukan',
+        'Terima kasih atas kehadiran, partisipasi, dan semangat luar biasa Bapak/Ibu',
+        'Salam hangat — Azhari, S.Kom & Tim Pengembang'
+      ];
+      slideData.notes = 'Tutup dengan ucapan terima kasih dan doa yang baik. Akhiri dengan senyuman dan salam perpisahan yang hangat.';
+      break;
+
+    default:
+      slideData.title = `Materi Pelatihan — Slide ${i + 1}`;
+      slideData.points = [
+        'Materi pendukung pelatihan pemanfaatan AI Media Ajar Studio',
+        'Silakan berdiskusi dan berbagi pengalaman penerapan di kelas',
+        'Pengembang: Azhari, S.Kom'
+      ];
+      slideData.notes = 'Bagian ini dapat dilengkapi sesuai kebutuhan tambahan.';
+  }
+
+  return slideData;
+});
+
+        let currentSlideIndex = 0;
+
+        function launchFullscreenPresentation(startIndex = 0) {
+            currentSlideIndex = startIndex;
+            const fsContainer = document.getElementById('presentation-fullscreen');
+            fsContainer.classList.remove('hidden');
+            fsContainer.classList.add('flex');
+            renderCurrentSlideInFullscreen();
+        }
+
+        function renderCurrentSlideInFullscreen() {
+            const fsContainer = document.getElementById('presentation-fullscreen');
+            const slide = presentationSlides[currentSlideIndex];
+
+            fsContainer.innerHTML = `
+                <div class="p-6 bg-navy-dark border-b border-white/10 flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <span class="bg-cyan/20 text-cyan text-xs font-bold px-3 py-1 rounded-full">Slide ${slide.num} / 32</span>
+                        <h3 class="font-bold text-lg text-white">${slide.title}</h3>
+                    </div>
+                    <button onclick="closeFullscreenPresentation()" class="text-white/70 hover:text-white px-3 py-1.5 rounded-lg bg-white/10 text-xs font-bold">
+                        <i class="fa-solid fa-xmark mr-1"></i> Keluar (Esc)
+                    </button>
+                </div>
+                <div class="flex-1 p-12 flex flex-col justify-center max-w-4xl mx-auto w-full space-y-8">
+                    <h2 class="text-4xl font-extrabold text-white tracking-tight">${slide.title}</h2>
+                    <ul class="space-y-4 text-white/90 text-xl">
+                        ${slide.points.map(pt => `<li class="flex items-start space-x-3"><i class="fa-solid fa-circle-check text-cyan mt-1.5"></i><span>${pt}</span></li>`).join('')}
+                    </ul>
+                    <div class="p-6 rounded-2xl bg-white/5 border border-white/10 text-sm text-cyan">
+                        <strong>Catatan Pemateri:</strong> ${slide.notes}
+                    </div>
+                </div>
+                <div class="p-6 bg-navy-dark border-t border-white/10 flex items-center justify-between">
+                    <button onclick="prevSlide()" class="px-6 py-2.5 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl text-sm transition-all">
+                        <i class="fa-solid fa-arrow-left mr-2"></i> Sebelumnya
+                    </button>
+                    <div class="text-xs text-white/60">Gunakan tombol panah keyboard atau klik navigasi</div>
+                    <button onclick="nextSlide()" class="px-6 py-2.5 bg-cyan text-navy font-bold rounded-xl text-sm transition-all shadow">
+                        Selanjutnya <i class="fa-solid fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            `;
+        }
+
+        function closeFullscreenPresentation() {
+            const fsContainer = document.getElementById('presentation-fullscreen');
+            fsContainer.classList.add('hidden');
+            fsContainer.classList.remove('flex');
+        }
+
+        function nextSlide() {
+            if (currentSlideIndex < presentationSlides.length - 1) {
+                currentSlideIndex++;
+                renderCurrentSlideInFullscreen();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlideIndex > 0) {
+                currentSlideIndex--;
+                renderCurrentSlideInFullscreen();
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (!document.getElementById('presentation-fullscreen').classList.contains('hidden')) {
+                if (e.key === 'ArrowRight') nextSlide();
+                if (e.key === 'ArrowLeft') prevSlide();
+                if (e.key === 'Escape') closeFullscreenPresentation();
+            }
+        });
+    </script>
+
+    <script>
+        function renderTrainingAgenda(container) {
+            document.getElementById('page-title').innerText = 'Agenda & Jadwal Pelatihan';
+            document.getElementById('breadcrumb').innerHTML = '<span>Beranda</span><i class="fa-solid fa-chevron-right text-[10px]"></i><span class="font-medium text-primary">Agenda Pelatihan</span>';
+
+            container.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-sm border border-surface-border p-6 mb-6">
+                    <h3 class="font-bold text-lg text-navy">Jadwal Sesi Pelatihan</h3>
+                    <p class="text-xs text-slate-custom mt-1">Susunan agenda kegiatan pelatihan pemanfaatan AI Media Ajar Studio.</p>
+                </div>
+
+                <div class="space-y-4">
+                    ${appData.agenda.map((ag, idx) => `
+                        <div class="bg-white rounded-2xl shadow-sm border border-surface-border p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                            <div class="flex items-start space-x-4">
+                                <div class="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-sm flex-shrink-0">
+                                    ${idx + 1}
+                                </div>
+                                <div>
+                                    <span class="text-xs bg-cyan/10 text-cyan-dark font-bold px-2.5 py-1 rounded-full">${ag.session} • ${ag.time}</span>
+                                    <h4 class="font-bold text-base text-navy mt-2">${ag.title}</h4>
+                                    <p class="text-xs text-slate-custom mt-1">${ag.activity}</p>
+                                    <div class="text-[11px] text-primary font-semibold mt-2">Fasilitator: ${ag.speaker}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function renderPromptTemplates(container) {
+            document.getElementById('page-title').innerText = 'Pustaka Template Prompt';
+            document.getElementById('breadcrumb').innerHTML = '<span>Beranda</span><i class="fa-solid fa-chevron-right text-[10px]"></i><span class="font-medium text-primary">Template Prompt</span>';
+
+            container.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-sm border border-surface-border p-6 mb-6">
+                    <h3 class="font-bold text-lg text-navy">Template Prompt Siap Pakai</h3>
+                    <p class="text-xs text-slate-custom mt-1">Salin dan gunakan template prompt tervalidasi untuk berbagai kebutuhan media dan asesmen.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    ${appData.promptTemplates.map(pt => `
+                        <div class="bg-white rounded-2xl shadow-sm border border-surface-border p-6 flex flex-col justify-between">
+                            <div>
+                                <span class="text-xs bg-primary/10 text-primary font-bold px-2.5 py-1 rounded-full">${pt.category}</span>
+                                <h4 class="font-bold text-base text-navy mt-2">${pt.name}</h4>
+                                <p class="text-xs text-slate-custom mt-1">${pt.desc}</p>
+                                <div class="mt-4 p-3 bg-surface rounded-xl border border-surface-border font-mono text-[11px] text-navy select-all line-clamp-4">${pt.prompt}</div>
+                            </div>
+                            <div class="mt-6 pt-4 border-t border-surface-border">
+                                <button onclick="navigator.clipboard.writeText('${pt.prompt}'); showToast('Template prompt disalin!', 'success');" class="w-full bg-primary hover:bg-primary-dark text-white py-2 rounded-xl text-xs font-bold transition-all shadow">
+                                    <i class="fa-solid fa-copy mr-1"></i> Salin Prompt
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function renderExternalPlatforms(container) {
+            document.getElementById('page-title').innerText = 'Platform Digital Eksternal';
+            document.getElementById('breadcrumb').innerHTML = '<span>Beranda</span><i class="fa-solid fa-chevron-right text-[10px]"></i><span class="font-medium text-primary">Platform Eksternal</span>';
+
+            const platforms = [
+                { name: 'Google Gemini', desc: 'Asisten AI generatif untuk merancang teks, analisis materi, dan penyusunan draf kurikulum.', url: 'https://gemini.google.com' },
+                { name: 'Canva for Education', desc: 'Platform desain grafis visual untuk infografis, poster, dan presentasi pembelajaran.', url: 'https://www.canva.com' },
+                { name: 'ChatGPT OpenAI', desc: 'Model bahasa besar untuk eksplorasi materi dan tanya jawab interaktif.', url: 'https://chatgpt.com' },
+                { name: 'Wordwall', desc: 'Pembuatan game edukasi interaktif seperti kuis, crossword, dan matching pairs.', url: 'https://wordwall.net' }
+            ];
+
+            container.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-sm border border-surface-border p-6 mb-6">
+                    <h3 class="font-bold text-lg text-navy">Integrasi & Rujukan Platform Eksternal</h3>
+                    <p class="text-xs text-slate-custom mt-1">Daftar platform digital resmi yang direkomendasikan untuk mendukung pembuatan media ajar.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    ${platforms.map(pl => `
+                        <div class="bg-white rounded-2xl shadow-sm border border-surface-border p-6 flex flex-col justify-between">
+                            <div>
+                                <h4 class="font-bold text-base text-navy">${pl.name}</h4>
+                                <p class="text-xs text-slate-custom mt-2 leading-relaxed">${pl.desc}</p>
+                            </div>
+                            <div class="mt-6 pt-4 border-t border-surface-border flex justify-end">
+                                <a href="${pl.url}" target="_blank" class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-xl text-xs font-bold transition-all shadow flex items-center space-x-1">
+                                    <span>Buka Situs Resmi</span>
+                                    <i class="fa-solid fa-external-link text-[10px]"></i>
+                                </a>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function renderSettings(container) {
+            document.getElementById('page-title').innerText = 'Pengaturan & Pengelolaan Data';
+            document.getElementById('breadcrumb').innerHTML = '<span>Beranda</span><i class="fa-solid fa-chevron-right text-[10px]"></i><span class="font-medium text-primary">Pengaturan</span>';
+
+            container.innerHTML = `
+                <div class="max-w-2xl mx-auto bg-white rounded-2xl shadow-sm border border-surface-border p-8 space-y-6">
+                    <h3 class="font-bold text-lg text-navy pb-4 border-b border-surface-border">Pusat Pengaturan Aplikasi</h3>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-bold text-sm text-navy">Status Penyimpanan</h4>
+                            <p class="text-xs text-slate-custom mt-1">Aplikasi menggunakan <strong>IndexedDB / localStorage Browser</strong> untuk menyimpan seluruh proyek, soal, dan kuis secara lokal.</p>
+                        </div>
+                        <div class="flex space-x-4 pt-4 border-t border-surface-border">
+                            <button onclick="exportAllData()" class="bg-primary hover:bg-primary-dark text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow">
+                                <i class="fa-solid fa-download mr-1"></i> Ekspor Backup Data (JSON)
+                            </button>
+                            <button onclick="resetAppData()" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow">
+                                <i class="fa-solid fa-rotate-right mr-1"></i> Reset ke Data Demo Awal
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function exportAllData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
+            const dlAnchor = document.createElement('a');
+            dlAnchor.setAttribute("href", dataStr);
+            dlAnchor.setAttribute("download", `ai_media_ajar_studio_backup_${new Date().toISOString().split('T')[0]}.json`);
+            document.body.appendChild(dlAnchor);
+            dlAnchor.click();
+            dlAnchor.remove();
+            showToast('Backup data berhasil diunduh!', 'success');
+        }
+
+        function resetAppData() {
+            if (confirm('Apakah Anda yakin ingin mereset seluruh data ke data demo awal?')) {
+                localStorage.removeItem('ai_media_ajar_data');
+                appData = DEFAULT_APP_DATA;
+                renderDashboard(document.getElementById('main-content'));
+                showToast('Aplikasi berhasil direset ke pengaturan awal.', 'success');
+            }
+        }
+    </script>
+</body>
+</html>
